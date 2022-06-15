@@ -1,11 +1,13 @@
 server:
-  port: 8888
+  port: 8080
 
-# mysql
+# mysql config
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/poc?allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8
+    url: jdbc:mysql://localhost:3306/ktp?allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8
     username: root
-    password: 123456
+#    password: 123456
+    password: root
+
 
