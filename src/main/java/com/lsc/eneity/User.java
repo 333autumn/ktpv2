@@ -31,7 +31,7 @@ public class User {
     private String avatar; //用户头像
     private String stno; //教师工号或学生学号
     private String schoolId; //所属学校id
-    private Integer status; //用户身份,0代表学生,1代表老师
+    private String status; //用户身份,0代表学生,1代表老师
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")

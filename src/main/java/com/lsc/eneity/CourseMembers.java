@@ -17,14 +17,13 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName("course_students")
+@TableName("course_members")
 public class CourseMembers {
     @TableId("id")
     private String id;
     private String courseId; //课程号
     private String stNo; //学生学号或者教师工号
-    private Integer courseMembersStatus; //课程状态 0->正常 1->归档 2->退课
-    private Integer status; //0代表学生,1代表老师
+    private String status; //0代表学生,1代表老师
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")

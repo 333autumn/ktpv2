@@ -25,7 +25,7 @@ public class Course {
     private String semester; //学期
     private String semesterYear; //学年
     private String ownerId; //创建人id
-    private Integer courseStatus; //课程状态0->正常 1->归档 2->删除
+    private String courseStatus; //课程状态0->正常 1->归档
     private Integer studentNum; //学生数量
     private String addCourseCode; //8位加课码
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")

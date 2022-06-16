@@ -3,6 +3,9 @@ package com.lsc.utils;
 import lombok.Data;
 import java.io.Serializable;
 
+/**
+ * 统一相应格式
+ */
 @Data
 public class ResponseResult implements Serializable {
     private Integer code;
@@ -22,6 +25,14 @@ public class ResponseResult implements Serializable {
         responseResult.setCode(200);
         responseResult.setMsg(msg);
         responseResult.setData("");
+        return responseResult;
+    }
+
+    public static ResponseResult ok(Object data){
+        ResponseResult responseResult=new ResponseResult();
+        responseResult.setCode(200);
+        responseResult.setMsg("查询成功");
+        responseResult.setData(data);
         return responseResult;
     }
 

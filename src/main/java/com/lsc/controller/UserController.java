@@ -9,8 +9,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author lsc
@@ -29,16 +31,18 @@ public class UserController {
      * 用户登录
      */
     @PostMapping("/login")
-    public ResponseResult login(@RequestParam("username") String username,
-                                @RequestParam("password") String password) {
-        log.info("username:{},password:{}",username,password);
+    public ResponseResult login(@RequestParam String username,@RequestParam String password) {
+        log.info("username==>{},password==>{}",username,password);
         //判断用户密码是否正确
         User user=userService.login(username,password);
         if (user!=null){
             //生成token,返回给前端
-            Map<String, String> data=new HashMap<>();
             String token= TokenUtils.generateToken(user);
+            //获取登陆用户的信息
+            User loginUser=userService.getByUserName(username);
+            Map<String, Object> data=new HashMap<>();
             data.put("token",token);
+            data.put("userInfo",loginUser);
             return ResponseResult.ok("登录成功",data);
         }
         return ResponseResult.error("登录失败");
@@ -49,8 +53,11 @@ public class UserController {
      */
     @PostMapping("/register")
     public ResponseResult register(@RequestBody User user){
-        log.info("user:{}", JSON.toJSONString(user));
-        if (userService.save(user)){
+        log.info("用户注册:user==>{}", JSON.toJSONString(user));
+        if (Objects.isNull(user)){
+            return ResponseResult.error("传入参数为空");
+        }
+        if (userService.add(user)){
             return ResponseResult.ok("用户注册成功");
         }
         return ResponseResult.error("用户注册失败");
@@ -60,12 +67,13 @@ public class UserController {
      * 判断用户名是否重复
      */
     @PostMapping("/isRepeat")
-    public boolean isRepeat(@RequestParam("username") String username){
+    public boolean isRepeat(@RequestParam String username){
         return userService.isRepeat(username);
     }
 
     /**
      * 修改用户信息
+     * 需要token
      */
     @PostMapping("/update")
     public ResponseResult update(@RequestBody User user){

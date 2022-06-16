@@ -14,4 +14,8 @@ public interface UserService extends IService<User> {
     boolean isRepeat(String username);
 
     boolean update(User user);
+
+    User getByUserName(String username);
+
+    boolean add(User user);
 }

@@ -7,7 +7,9 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.lsc.eneity.User;
 
-
+/**
+ * Token工具类
+ */
 public class TokenUtils {
 
     //token到期时间10小时

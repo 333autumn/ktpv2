@@ -1,7 +1,6 @@
 package com.lsc.config;
 
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.alibaba.fastjson.support.config.FastJsonConfig;
 import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,12 +15,13 @@ import java.util.List;
  * fastjson配置类
  */
 @Configuration
-public class FJsonConfig {
-    
+public class FastJsonConfig {
+
+    //加上注解把当前配置类交给ioc容器管理
     @Bean
     public HttpMessageConverter configureMessageConverters() {
         FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
-        FastJsonConfig config = new FastJsonConfig();
+        com.alibaba.fastjson.support.config.FastJsonConfig config = new com.alibaba.fastjson.support.config.FastJsonConfig();
         config.setSerializerFeatures(
                 // 保留map空的字段
                 SerializerFeature.WriteMapNullValue,

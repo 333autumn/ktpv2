@@ -9,4 +9,5 @@ import com.lsc.eneity.School;
  * @date 2022/6/13 15:35
  */
 public interface SchoolService extends IService<School> {
+    void add(String schoolName);
 }

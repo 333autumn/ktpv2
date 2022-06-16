@@ -5,8 +5,10 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lsc.eneity.User;
 import com.lsc.mapper.UserMapper;
 import com.lsc.service.UserService;
+import com.lsc.utils.DateUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.Objects;
 
 
@@ -61,6 +63,31 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (getOne(queryWrapper)==null){
             return false;
         }
+        return save(user);
+    }
+
+    /**
+     * 根据用户名获取用户信息
+     */
+    @Override
+    public User getByUserName(String username) {
+        LambdaQueryWrapper<User> queryWrapper=new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getUsername,username);
+        User user=getOne(queryWrapper);
+        return user;
+    }
+
+    /**
+     * 新增用户
+     */
+    @Override
+    public boolean add(User user) {
+        //根据用户名唯一的特性判断用户是否存在
+        if (isRepeat(user.getUsername())){
+            return false;
+        }
+        user.setCreateTime(DateUtils.now());
+        user.setUpdateTime(DateUtils.now());
         return save(user);
     }
 }
