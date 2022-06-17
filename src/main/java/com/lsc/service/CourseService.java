@@ -13,15 +13,15 @@ import java.util.List;
  */
 public interface CourseService extends IService<Course> {
 
-    List<Course> selectAllNormalCourses(String id);
-
-    List<Course> selectAllArchiveCourses(String id);
+    List<Course> selectAllCourses(String id,String courseStatus);
 
     void archiveCourse(String courseId);
 
     ResponseResult selectAllMembers(String courseId);
 
-    Course addCourse(Course course);
+    Course createCourse(Course course);
 
     boolean isRepeatedCode(String addCourseCode);
+
+    void joinCourse(String courseId, String userId);
 }

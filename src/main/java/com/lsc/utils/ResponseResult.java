@@ -4,7 +4,7 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * 统一相应格式
+ * 统一响应格式
  */
 @Data
 public class ResponseResult implements Serializable {

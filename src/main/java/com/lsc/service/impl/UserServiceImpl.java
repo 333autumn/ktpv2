@@ -8,7 +8,6 @@ import com.lsc.service.UserService;
 import com.lsc.utils.DateUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.Objects;
 
 
@@ -49,7 +48,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         LambdaQueryWrapper<User> queryWrapper=new LambdaQueryWrapper<>();
         queryWrapper.eq(User::getUsername,username);
         User user=getOne(queryWrapper);
-        return user==null;
+        return user!=null;
     }
 
     /**
@@ -84,6 +83,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public boolean add(User user) {
         //根据用户名唯一的特性判断用户是否存在
         if (isRepeat(user.getUsername())){
+            log.error("用户名:"+user.getUsername()+"已存在,新增用户失败");
             return false;
         }
         user.setCreateTime(DateUtils.now());

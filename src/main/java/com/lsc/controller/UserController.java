@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -55,6 +54,7 @@ public class UserController {
     public ResponseResult register(@RequestBody User user){
         log.info("用户注册:user==>{}", JSON.toJSONString(user));
         if (Objects.isNull(user)){
+            log.error("用户注册,传入参数为空");
             return ResponseResult.error("传入参数为空");
         }
         if (userService.add(user)){

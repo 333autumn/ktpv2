@@ -22,7 +22,7 @@ public class CourseMembers {
     @TableId("id")
     private String id;
     private String courseId; //课程号
-    private String stNo; //学生学号或者教师工号
+    private String userId; //用户id
     private String status; //0代表学生,1代表老师
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;

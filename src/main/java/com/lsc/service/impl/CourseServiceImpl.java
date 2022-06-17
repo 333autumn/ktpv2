@@ -11,11 +11,13 @@ import com.lsc.utils.Constant;
 import com.lsc.utils.DateUtils;
 import com.lsc.utils.ResponseResult;
 import com.lsc.utils.StringUtils;
+
 import lombok.RequiredArgsConstructor;
+
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -25,90 +27,62 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> implements CourseService {
 
     private final CourseMembersServiceImpl courseMembersService;
+
     private final UserServiceImpl userService;
 
     /**
-     * 返回所有教师创建的课程和加入的课程
+     * 返回所有用户创建的课程和加入的课程
      * 课程状态为正常
      */
     @Override
-    public List<Course> selectAllNormalCourses(String id) {
-        //根据id查询对应的教师
-        LambdaQueryWrapper<User> queryWrapper=new LambdaQueryWrapper<>();
-        queryWrapper.eq(User::getUsername,id);
-        User user=userService.getOne(queryWrapper);
-        if (Objects.isNull(user)){
-            throw new RuntimeException("没有对应的教师");
+    public List<Course> selectAllCourses(String userId, String courseStatus) {
+        //根据id查询对应的用户
+        LambdaQueryWrapper<User> userQW = new LambdaQueryWrapper<>();
+        userQW.eq(User::getUserId, userId);
+        User user = userService.getOne(userQW);
+        if (Objects.isNull(user)) {
+            throw new RuntimeException("没有对应的用户");
         }
-        //查询教师加入的课程
-        LambdaQueryWrapper<CourseMembers> queryWrapper2=new LambdaQueryWrapper<>();
-        queryWrapper2.eq(CourseMembers::getStNo,user.getStno());
-        //查询教师加入的课程
-        List<CourseMembers> courseMembers = courseMembersService.list(queryWrapper2);
-        //获取所有教师加入的课程id
+        //查询用户加入的课程信息
+        LambdaQueryWrapper<CourseMembers> courseMembersQW = new LambdaQueryWrapper<>();
+        courseMembersQW.eq(CourseMembers::getUserId, userId);
+        List<CourseMembers> courseMembers = courseMembersService.list(courseMembersQW);
+        //获取所有用户加入的课程id
         List<String> courseIds = courseMembers
                 .stream()
-                .map(CourseMembers::getId)
+                .map(CourseMembers::getCourseId)
                 .collect(Collectors.toList());
         //根据课程id查询对应的课程信息
-        LambdaQueryWrapper<Course> queryWrapper3=new LambdaQueryWrapper<>();
-        queryWrapper3.in(Course::getCourseId,courseIds)
-                .eq(Course::getCourseStatus,Constant.CourseStatus.NORMAL);
-        return list(queryWrapper3);
-    }
-
-    /**
-     * 返回所有教师创建的课程和加入的课程
-     * 课程状态为归档
-     */
-    @Override
-    public List<Course> selectAllArchiveCourses(String id) {
-        //根据id查询对应的教师
-        LambdaQueryWrapper<User> queryWrapper=new LambdaQueryWrapper<>();
-        queryWrapper.eq(User::getUsername,id);
-        User user=userService.getOne(queryWrapper);
-        if (Objects.isNull(user)){
-            throw new RuntimeException("没有对应的教师");
-        }
-        //查询教师加入的课程
-        LambdaQueryWrapper<CourseMembers> queryWrapper2=new LambdaQueryWrapper<>();
-        queryWrapper2.eq(CourseMembers::getStNo,user.getStno());
-        //查询教师加入的课程
-        List<CourseMembers> courseMembers = courseMembersService.list(queryWrapper2);
-        //获取所有教师加入的课程id
-        List<String> courseIds = courseMembers
-                .stream()
-                .map(CourseMembers::getId)
-                .collect(Collectors.toList());
-        //根据课程id查询对应的课程信息
-        LambdaQueryWrapper<Course> queryWrapper3=new LambdaQueryWrapper<>();
-        queryWrapper3.in(Course::getCourseId,courseIds)
-                .eq(Course::getCourseStatus,Constant.CourseStatus.ARCHIVE);
-        return list(queryWrapper3);
+        LambdaQueryWrapper<Course> courseQW = new LambdaQueryWrapper<>();
+        courseQW.in(Course::getCourseId, courseIds)
+                .eq(Course::getCourseStatus, courseStatus);
+        return list(courseQW);
     }
 
     /**
      * 课程归档
      * 将课程的状态改为归档
+     * 只有教师可以归档课程
      */
     @Override
     public void archiveCourse(String courseId) {
         //根据课程id查询对应的课程
-        LambdaQueryWrapper<Course> queryWrapper=new LambdaQueryWrapper<>();
-        queryWrapper.eq(Course::getCourseId,courseId);
-        Course course=getOne(queryWrapper);
-        if (course==null){
+        LambdaQueryWrapper<Course> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Course::getCourseId, courseId);
+        Course course = getOne(queryWrapper);
+        if (course == null) {
             throw new RuntimeException("没有对应的课程");
         }
-        if (course.getCourseStatus().equals(Constant.CourseStatus.ARCHIVE)){
+        if (course.getCourseStatus().equals(Constant.CourseStatus.ARCHIVE)) {
             throw new RuntimeException("课程已经归档");
         }
         course.setCourseStatus(Constant.CourseStatus.ARCHIVE);
         //更新状态
-        if (!updateById(course)){
+        if (!updateById(course)) {
             throw new RuntimeException("课程归档失败");
         }
     }
@@ -119,34 +93,53 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
      */
     @Override
     public ResponseResult selectAllMembers(String courseId) {
-        
-        return null;
+        Map<String, Object> data=new HashMap<>();
+        //获取所有加入该课程的教师
+        List<User> teachers=selectMembersByStatus(Constant.UserStatus.TEACHER,courseId);
+        data.put("teacherNum",teachers.size());
+        data.put("teachers",teachers);
+        //获取所有加入该课程的学生
+        List<User> students=selectMembersByStatus(Constant.UserStatus.STUDENT,courseId);
+        data.put("studentNum",students.size());
+        data.put("students",students);
+        return ResponseResult.ok(data);
     }
 
     /**
-     * 新增课程
+     * 教师创建课程
+     * 教师自动加入课程
      */
     @Override
-    public Course addCourse(Course course) {
+    public Course createCourse(Course course) {
         //设置课程状态
         course.setCourseStatus(Constant.CourseStatus.NORMAL);
         //设置学生数量
         course.setStudentNum(0);
         //获取不重复的8位加课码
-        String addCourseCode= StringUtils.getAddCourseCode();
-        while (isRepeatedCode(addCourseCode)){
-            addCourseCode=StringUtils.getAddCourseCode();
+        String addCourseCode = StringUtils.getAddCourseCode();
+        while (isRepeatedCode(addCourseCode)) {
+            addCourseCode = StringUtils.getAddCourseCode();
         }
         //设置加课码
         course.setAddCourseCode(addCourseCode);
         //设置创建时间
         course.setCreateTime(DateUtils.now());
         course.setUpdateTime(DateUtils.now());
-        if (save(course)){
-            //根据加课码查询用户
-            LambdaQueryWrapper<Course> queryWrapper=new LambdaQueryWrapper<>();
-            queryWrapper.eq(Course::getAddCourseCode,addCourseCode);
-            return getOne(queryWrapper);
+        if (save(course)) {
+            log.info("课程创建成功");
+            //根据加课码查询课程
+            LambdaQueryWrapper<Course> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(Course::getAddCourseCode, addCourseCode);
+            Course course1=getOne(queryWrapper);
+            //课程创建成功,教师自动加入课程
+            CourseMembers courseMembers=new CourseMembers();
+            courseMembers.setCourseId(course1.getCourseId());
+            courseMembers.setUserId(course.getOwnerId());
+            courseMembers.setCreateTime(DateUtils.now());
+            courseMembers.setUpdateTime(DateUtils.now());
+            courseMembersService.updateById(courseMembers);
+            log.info("教师自动加入课程成功");
+            return course1;
         }
         return null;
     }
@@ -164,5 +157,82 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
         LambdaQueryWrapper<Course> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Course::getAddCourseCode, addCourseCode);
         return getOne(queryWrapper) != null;
+    }
+
+    /**
+     * 加入课程
+     * @param courseId 课程id
+     * @param userId   用户id
+     */
+    @Override
+    public void joinCourse(String courseId, String userId) {
+        //判断课程是否存在
+        Course course=getById(courseId);
+        if (Objects.isNull(course)){
+            throw new RuntimeException("课程不存在,无法加入课程");
+        }
+
+        //判断用户是否存在
+        User user = userService.getById(userId);
+        if (Objects.isNull(user)) {
+            throw new RuntimeException("用户不存在,无法加入课程");
+        }
+
+        //判断用户是否已经加入课程
+        LambdaQueryWrapper<CourseMembers> courseMembersQW=new LambdaQueryWrapper<>();
+        courseMembersQW.eq(CourseMembers::getCourseId,courseId)
+                .eq(CourseMembers::getUserId,userId);
+        if (Objects.nonNull(courseMembersService.getOne(courseMembersQW))){
+            throw new RuntimeException("用户已加入课程");
+        }
+
+        //如果是学生加入课程,课程的学生数量需要加1
+        if (user.getStatus().equals(Constant.UserStatus.STUDENT)){
+            course.setStudentNum(course.getStudentNum()+1);
+            updateById(course);
+        }
+
+        //封装CourseMembers对象
+        CourseMembers courseMembers = new CourseMembers();
+        courseMembers.setCourseId(courseId);
+        courseMembers.setUserId(userId);
+        courseMembers.setStatus(user.getStatus());
+        courseMembers.setCreateTime(DateUtils.now());
+        courseMembers.setUpdateTime(DateUtils.now());
+
+        //保存
+        if (!courseMembersService.save(courseMembers)) {
+            throw new RuntimeException("数据库发生错误,加入课程失败");
+        }
+    }
+
+    /**
+     * 查询课程下某个身份的所有成员
+     * @param status 用户身份
+     * @param courseId 课程id
+     */
+    public List<User> selectMembersByStatus(String status,String courseId) {
+        List<User> list=new ArrayList<>();
+        //根据课程id获取所有课程信息
+        LambdaQueryWrapper<CourseMembers> qw = new LambdaQueryWrapper<>();
+        qw.eq(CourseMembers::getCourseId, courseId)
+                .eq(CourseMembers::getStatus, status);
+
+        List<CourseMembers> courseMembers = courseMembersService.list(qw);
+
+        if (courseMembers.size()==0){
+            return list;
+        }
+
+        //根据课程信息获取所有加入该课程用户的id
+        List<String> courseTeachersIds = courseMembers.stream()
+                .map(CourseMembers::getUserId)
+                .collect(Collectors.toList());
+
+        //根据用户id查询用户信息
+        LambdaQueryWrapper<User> userQW = new LambdaQueryWrapper<>();
+        userQW.in(User::getUserId, courseTeachersIds);
+        list=userService.list(userQW);
+        return list;
     }
 }

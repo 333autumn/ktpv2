@@ -14,7 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
  */
 @SpringBootTest
 @Slf4j
-public class SchoolTest {
+public class SchoolTests {
 
     @Autowired
     private SchoolServiceImpl schoolService;

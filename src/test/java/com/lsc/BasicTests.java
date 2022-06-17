@@ -14,7 +14,7 @@ import java.util.List;
 
 @SpringBootTest
 @Slf4j
-class Ktpv2ApplicationTests {
+class BasicTests {
 
     @Autowired
     private UserMapper userMapper;

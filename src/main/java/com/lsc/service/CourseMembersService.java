@@ -9,4 +9,5 @@ import com.lsc.eneity.CourseMembers;
  * @date 2022/6/13 15:36
  */
 public interface CourseMembersService extends IService<CourseMembers> {
+
 }
