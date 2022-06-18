@@ -66,8 +66,13 @@ public class UserController {
     /**
      * 判断用户名是否重复
      */
-    @PostMapping("/isRepeat")
+    @GetMapping("/isRepeat")
     public boolean isRepeat(@RequestParam String username){
+        if (Objects.isNull(username)){
+            log.error("判断用户名是否重复传入参数为空");
+            return true;
+        }
+        log.info("判断用户名是否重复,username==>{}",username);
         return userService.isRepeat(username);
     }
 

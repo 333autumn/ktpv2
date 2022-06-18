@@ -5,10 +5,6 @@ package com.lsc.utils;
  * @version 1.0
  * @date 2022/6/16 21:02
  */
-
-/**
- * 字符串工具类
- */
 public class StringUtils {
 
     /**

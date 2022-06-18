@@ -72,8 +72,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public User getByUserName(String username) {
         LambdaQueryWrapper<User> queryWrapper=new LambdaQueryWrapper<>();
         queryWrapper.eq(User::getUsername,username);
-        User user=getOne(queryWrapper);
-        return user;
+        return getOne(queryWrapper);
     }
 
     /**

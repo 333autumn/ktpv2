@@ -5,10 +5,6 @@ package com.lsc.utils;
  * @version 1.0
  * @date 2022/6/16 16:02
  */
-
-/**
- * 一些常量
- */
 public class Constant {
 
     public static class CourseStatus {

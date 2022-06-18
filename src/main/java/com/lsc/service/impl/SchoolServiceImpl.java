@@ -7,7 +7,7 @@ import com.lsc.mapper.SchoolMapper;
 import com.lsc.service.SchoolService;
 import org.springframework.stereotype.Service;
 
-import javax.xml.crypto.Data;
+
 import java.util.Date;
 
 /**
@@ -35,5 +35,18 @@ public class SchoolServiceImpl extends ServiceImpl<SchoolMapper, School> impleme
         school.setUpdateTime(new Date(System.currentTimeMillis()));
         //保存学校
         save(school);
+    }
+
+    /**
+     * 判断学校是否重复
+     * @param schoolName 学校名
+     */
+    @Override
+    public boolean isRepeat(String schoolName) {
+        //根据学校名查询学校
+        LambdaQueryWrapper<School> queryWrapper=new LambdaQueryWrapper<>();
+        queryWrapper.eq(School::getSchoolName,schoolName);
+        //查询结果不为空说明重复,返回true
+        return getOne(queryWrapper)!=null;
     }
 }

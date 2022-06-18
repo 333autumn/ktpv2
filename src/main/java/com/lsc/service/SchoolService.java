@@ -10,4 +10,6 @@ import com.lsc.eneity.School;
  */
 public interface SchoolService extends IService<School> {
     void add(String schoolName);
+
+    boolean isRepeat(String schoolName);
 }
