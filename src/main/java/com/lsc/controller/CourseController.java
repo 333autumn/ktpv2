@@ -2,9 +2,9 @@ package com.lsc.controller;
 
 import com.lsc.eneity.Course;
 import com.lsc.service.impl.CourseServiceImpl;
+import com.lsc.service.impl.UserServiceImpl;
 import com.lsc.utils.Constant;
 import com.lsc.utils.ResponseResult;
-import com.lsc.utils.TokenUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +24,7 @@ public class CourseController {
 
     private final CourseServiceImpl courseService;
 
+    private final UserServiceImpl userService;
 
     /**
      * 返回所有用户创建的课程和加入的课程（课程状态为正常）
@@ -45,14 +46,12 @@ public class CourseController {
     }
 
     /**
-     * 返回所有教师归档的课程
+     * 返回所有用户归档的课程
      */
     @GetMapping("/selectAllArchiveCourses")
-    public ResponseResult selectAllArchiveCourses(@RequestHeader String token) {
-        //从token中获取用户id
-        String id = TokenUtils.getUserId(token);
+    public ResponseResult selectAllArchiveCourses(@RequestParam String userId) {
         try {
-            List<Course> courses = courseService.selectAllCourses(id, Constant.CourseStatus.ARCHIVE);
+            List<Course> courses = courseService.selectAllCourses(userId, Constant.CourseStatus.ARCHIVE);
             return ResponseResult.ok(courses);
         } catch (RuntimeException e) {
             return ResponseResult.error(e.getMessage());
@@ -62,8 +61,12 @@ public class CourseController {
     /**
      * 编辑课程
      */
-    @PostMapping("/editCourses")
-    public ResponseResult editCourses(@RequestBody Course course) {
+    @PostMapping("/editCourse")
+    public ResponseResult editCourses(@RequestBody Course course,@RequestHeader String token) {
+        //根据token判断请求用户的身份
+        if (!userService.getStatus(token).equals("1")){
+            return ResponseResult.error("只有教师可以编辑课程");
+        }
         if (courseService.updateById(course)) {
             return ResponseResult.ok("编辑课程成功");
         }
@@ -74,8 +77,13 @@ public class CourseController {
      * 删除课程
      */
     @PostMapping("/deleteCourse")
-    public ResponseResult deleteCourse(@RequestBody Course course) {
-        if (courseService.removeById(course)) {
+    public ResponseResult deleteCourse(@RequestParam String courseId) {
+        if (Objects.isNull(courseId)) {
+            log.error("删除课程传入参数为空");
+            return ResponseResult.error("传入参数为空");
+        }
+        log.info("删除课程,courseId==>{}",courseId);
+        if (courseService.removeById(courseId)) {
             return ResponseResult.ok("删除课程成功");
         }
         return ResponseResult.error("删除课程失败");
@@ -112,7 +120,11 @@ public class CourseController {
      * 默认教师加入该课程
      */
     @PostMapping("/createCourse")
-    public ResponseResult createCourse(@RequestBody Course course) {
+    public ResponseResult createCourse(@RequestBody Course course,@RequestHeader String token) {
+        //根据token判断请求用户的身份
+        if (!userService.getStatus(token).equals("1")){
+            return ResponseResult.error("只有教师可以创建课程");
+        }
         Course data = courseService.createCourse(course);
         if (data != null) {//新增课程成功
             return ResponseResult.ok("创建课程成功", data);

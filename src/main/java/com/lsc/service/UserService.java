@@ -18,4 +18,6 @@ public interface UserService extends IService<User> {
     User getByUserName(String username);
 
     boolean add(User user);
+
+    String getStatus(String token);
 }

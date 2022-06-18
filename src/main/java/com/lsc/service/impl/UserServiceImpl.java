@@ -6,6 +6,7 @@ import com.lsc.eneity.User;
 import com.lsc.mapper.UserMapper;
 import com.lsc.service.UserService;
 import com.lsc.utils.DateUtils;
+import com.lsc.utils.TokenUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -62,7 +63,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (getOne(queryWrapper)==null){
             return false;
         }
-        return save(user);
+        return updateById(user);
     }
 
     /**
@@ -88,5 +89,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setCreateTime(DateUtils.now());
         user.setUpdateTime(DateUtils.now());
         return save(user);
+    }
+
+    /**
+     * 根据token返回用户的身份
+     * @param token 请求头
+     * @return 用户身份
+     */
+    @Override
+    public String getStatus(String token) {
+        //根据token获取用户id
+        String userId= TokenUtils.getUserId(token);
+        //根据用户id查询用户信息
+        User user = getById(userId);
+        if (Objects.isNull(user)){
+            //返回一个不为1的字符串,这样就不会和老师的身份匹配,操作无法继续
+            return "3";
+        }
+        return user.getStatus();
     }
 }
