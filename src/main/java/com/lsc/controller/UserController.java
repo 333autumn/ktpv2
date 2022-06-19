@@ -31,7 +31,7 @@ public class UserController {
      */
     @PostMapping("/login")
     public ResponseResult login(@RequestParam String username, @RequestParam String password) {
-        log.info("username==>{},password==>{}", username, password);
+        log.info("用户登录:username==>{},password==>{}", username, password);
         //判断用户密码是否正确
         User user = userService.login(username, password);
         if (user != null) {
@@ -83,6 +83,7 @@ public class UserController {
      */
     @PostMapping("/update")
     public ResponseResult update(@RequestBody User user) {
+        log.info("修改用户信息==>{}",JSON.toJSONString(user));
         if (userService.update(user)) {
             return ResponseResult.ok("修改用户信息成功");
         }
@@ -93,6 +94,14 @@ public class UserController {
     public ResponseResult test(){
         userService.test();
         return ResponseResult.ok("查询成功");
+    }
+
+    /**
+     * 根据id获取用户信息
+     */
+    @GetMapping("/getInfoById")
+    public ResponseResult getInfoById(String userId){
+        return userService.getInfoById(userId);
     }
 
 }

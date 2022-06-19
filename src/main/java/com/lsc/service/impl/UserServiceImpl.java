@@ -6,9 +6,11 @@ import com.lsc.eneity.User;
 import com.lsc.mapper.UserMapper;
 import com.lsc.service.UserService;
 import com.lsc.utils.DateUtils;
+import com.lsc.utils.ResponseResult;
 import com.lsc.utils.TokenUtils;
 import org.springframework.stereotype.Service;
 
+import javax.xml.crypto.Data;
 import java.util.Objects;
 
 
@@ -116,4 +118,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public void test() {
         throw new RuntimeException("RuntimeException");
     }
+
+
+    /**
+     * 根据用户id获取用户信息
+     * @param userId 用户id
+     */
+    @Override
+    public ResponseResult getInfoById(String userId) {
+        User user=getById(userId);
+        if (Objects.isNull(user)){
+            return ResponseResult.error("用户不存在");
+        }
+        return ResponseResult.ok(user);
+    }
+
 }

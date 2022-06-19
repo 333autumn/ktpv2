@@ -2,6 +2,7 @@ package com.lsc.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.lsc.eneity.User;
+import com.lsc.utils.ResponseResult;
 
 /**
  * @author lsc
@@ -22,4 +23,6 @@ public interface UserService extends IService<User> {
     String getStatus(String token);
 
     void test();
+
+    ResponseResult getInfoById(String userId);
 }

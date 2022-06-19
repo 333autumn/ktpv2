@@ -10,10 +10,13 @@ spring:
     username: root
     password: Aa@123456
 
+  # 设置单次文件上传的大小限制
+  servlet:
+    multipart:
+      max-file-size: 100MB
+
 # 开启mybatis-plus控制台 SQL 日志打印
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-
-
 

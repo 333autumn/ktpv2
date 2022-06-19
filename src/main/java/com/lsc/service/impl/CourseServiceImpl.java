@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import javax.websocket.OnError;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -273,6 +274,10 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
         LambdaQueryWrapper<CourseMembers> queryWrapper=new LambdaQueryWrapper<>();
         queryWrapper.eq(CourseMembers::getCourseId,courseId)
                 .eq(CourseMembers::getUserId,userId);
+
+        if (Objects.isNull(userId)){
+            throw new RuntimeException("用户id为空,退课失败");
+        }
 
         if (!courseMembersService.remove(queryWrapper)){
             throw new RuntimeException("数据库错误,退课失败");

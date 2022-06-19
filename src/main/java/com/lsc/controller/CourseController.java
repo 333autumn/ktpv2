@@ -179,6 +179,7 @@ public class CourseController {
         if (token.length() == 0) {
             return ResponseResult.error("未携带token");
         }
+        log.info("学生退课,token==>{}",token);
         String userId = TokenUtils.getUserId(token);
         courseService.exitCourse(courseId, userId);
         return ResponseResult.ok("退课成功");

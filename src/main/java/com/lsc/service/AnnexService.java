@@ -2,6 +2,8 @@ package com.lsc.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.lsc.eneity.Annex;
+import com.lsc.utils.ResponseResult;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * @author lsc
@@ -9,4 +11,6 @@ import com.lsc.eneity.Annex;
  * @date 2022/6/15 15:13
  */
 public interface AnnexService extends IService<Annex> {
+     ResponseResult upload(MultipartFile file);
+
 }
