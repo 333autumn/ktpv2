@@ -36,14 +36,9 @@ public class CourseController {
             return ResponseResult.error("传入参数为空");
         }
         log.info("获取所有课程传入userId==>{}", userId);
-        try {
-            List<Course> courses = courseService.selectAllCourses(userId, Constant.CourseStatus.NORMAL);
-            log.info("获取所有课程成功");
-            return ResponseResult.ok(courses);
-        } catch (RuntimeException e) {
-            log.error("获取所有课程失败,错误信息==>{}", e.getMessage());
-            return ResponseResult.error(e.getMessage());
-        }
+        List<Course> courses = courseService.selectAllCourses(userId, Constant.CourseStatus.NORMAL);
+        log.info("获取所有课程成功");
+        return ResponseResult.ok(courses);
     }
 
     /**
@@ -51,12 +46,9 @@ public class CourseController {
      */
     @GetMapping("/selectAllArchiveCourses")
     public ResponseResult selectAllArchiveCourses(@RequestParam String userId) {
-        try {
-            List<Course> courses = courseService.selectAllCourses(userId, Constant.CourseStatus.ARCHIVE);
-            return ResponseResult.ok(courses);
-        } catch (RuntimeException e) {
-            return ResponseResult.error(e.getMessage());
-        }
+        List<Course> courses = courseService.selectAllCourses(userId, Constant.CourseStatus.ARCHIVE);
+
+        return ResponseResult.ok(courses);
     }
 
     /**
@@ -94,13 +86,10 @@ public class CourseController {
         //根据token获取用户id
         String userId = TokenUtils.getUserId(token);
         log.info("删除课程,courseId==>{},userId==>{}", courseId, userId);
-        try {
-            courseService.deleteCourse(courseId, userId);
-            return ResponseResult.ok("删除课程成功");
-        } catch (RuntimeException e) {
-            log.error("删除课程失败,==>{}", e.getMessage());
-            return ResponseResult.error(e.getMessage());
-        }
+
+        courseService.deleteCourse(courseId, userId);
+        return ResponseResult.ok("删除课程成功");
+
     }
 
     /**
@@ -108,16 +97,15 @@ public class CourseController {
      */
     @PostMapping("/archiveCourse")
     public ResponseResult archiveCourse(@RequestParam String courseId, @RequestParam String userId) {
-        try {
-            courseService.archiveCourse(courseId, userId);
-        } catch (RuntimeException e) {
-            return ResponseResult.error("课程归档失败");
-        }
+
+        courseService.archiveCourse(courseId, userId);
+
         return ResponseResult.ok("课程归档成功");
     }
 
     /**
      * 课程归档全部
+     * 加入该课程的所有人的关联表里的状态改为归档
      * 只有教师可以归档全部
      */
     @PostMapping("/archiveCourseAll")
@@ -129,11 +117,9 @@ public class CourseController {
         if (!userService.getStatus(token).equals("1")) {
             return ResponseResult.error("只有教师可以归档全部");
         }
-        try {
-            courseService.archiveCourseALL(courseId);
-        } catch (RuntimeException e) {
-            return ResponseResult.error("课程归档全部失败");
-        }
+
+        courseService.archiveCourseALL(courseId);
+
         return ResponseResult.ok("课程归档全部成功");
     }
 
@@ -179,14 +165,9 @@ public class CourseController {
             return ResponseResult.error("传入参数为空");
         }
         log.info("加入课程传入参数:addCourseCode==>{},userId==>{}", addCourseCode, userId);
-        try {
-            courseService.joinCourse(addCourseCode, userId);
-            log.info("加入课程成功");
-            return ResponseResult.ok("加入课程成功");
-        } catch (RuntimeException e) {
-            log.error("加入课程发生错误,错误信息==>{}", e.getMessage());
-            return ResponseResult.error(e.getMessage());
-        }
+        courseService.joinCourse(addCourseCode, userId);
+        log.info("加入课程成功");
+        return ResponseResult.ok("加入课程成功");
     }
 
     /**
@@ -199,12 +180,7 @@ public class CourseController {
             return ResponseResult.error("未携带token");
         }
         String userId = TokenUtils.getUserId(token);
-        try {
-            courseService.exitCourse(courseId, userId);
-        } catch (RuntimeException e) {
-            log.error("学生退课发生错误==>{}", e.getMessage());
-            return ResponseResult.error(e.getMessage());
-        }
+        courseService.exitCourse(courseId, userId);
         return ResponseResult.ok("退课成功");
     }
 
@@ -212,14 +188,11 @@ public class CourseController {
      * 恢复归档的课程
      */
     @PostMapping("/recoverCourse")
-    public ResponseResult recoverCourse(@RequestParam String courseId,@RequestParam String userId){
-        log.info("恢复归档的课程,courseId==>{},userId==>{}",courseId,userId);
-        try {
-            courseService.recoverCourse(courseId, userId);
-        } catch (RuntimeException e) {
-            log.error("恢复归档课程发生错误==>{}", e.getMessage());
-            return ResponseResult.error(e.getMessage());
-        }
+    public ResponseResult recoverCourse(@RequestParam String courseId,@RequestParam String userId) {
+        log.info("恢复归档的课程,courseId==>{},userId==>{}", courseId, userId);
+
+        courseService.recoverCourse(courseId, userId);
+
         return ResponseResult.ok("恢复归档课程成功");
     }
 

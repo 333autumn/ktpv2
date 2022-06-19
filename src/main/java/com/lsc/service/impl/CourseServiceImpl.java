@@ -36,7 +36,7 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
 
     /**
      * 返回所有用户创建的课程和加入的课程
-     * 课程状态为正常
+     * 课程状态为传入的状态
      */
     @Override
     public List<Course> selectAllCourses(String userId, String courseStatus) {
@@ -49,7 +49,9 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
         }
         //查询用户加入的课程信息
         LambdaQueryWrapper<CourseMembers> courseMembersQW = new LambdaQueryWrapper<>();
-        courseMembersQW.eq(CourseMembers::getUserId, userId);
+        courseMembersQW.eq(CourseMembers::getUserId, userId)
+                .eq(CourseMembers::getCourseStatus,courseStatus);
+
         List<CourseMembers> courseMembers = courseMembersService.list(courseMembersQW);
         //获取所有用户加入的课程id
         List<String> courseIds = courseMembers
@@ -58,8 +60,8 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
                 .collect(Collectors.toList());
         //根据课程id查询对应的课程信息
         LambdaQueryWrapper<Course> courseQW = new LambdaQueryWrapper<>();
-        courseQW.in(Course::getCourseId, courseIds)
-                .eq(Course::getCourseStatus, courseStatus);
+        courseQW.in(Course::getCourseId, courseIds);
+
         return list(courseQW);
     }
 
@@ -226,7 +228,18 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
      */
     @Override
     public void archiveCourseALL(String courseId) {
+        //根据课程id查找关联表
+        LambdaQueryWrapper<CourseMembers> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(CourseMembers::getCourseId, courseId);
 
+        List<CourseMembers> list = courseMembersService.list(queryWrapper);
+
+        //遍历list,将状态全部改为归档
+        for (CourseMembers courseMembers : list) {
+            courseMembers.setCourseStatus(Constant.CourseStatus.ARCHIVE);
+            courseMembersService.updateById(courseMembers);
+        }
+        log.info("课程归档全部成功");
     }
 
     /**

@@ -69,4 +69,14 @@ class BasicTests {
 //        log.info("token验证结果:{}",TokenUtils.verifyToken(token));
     }
 
+//    /**
+//     * 测试全局异常处理
+//     */
+//    @Test
+//    public void testExceptionHandler(){
+//        System.out.println(userController.test());
+//    }
+
+
+
 }

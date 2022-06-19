@@ -30,19 +30,19 @@ public class UserController {
      * 用户登录
      */
     @PostMapping("/login")
-    public ResponseResult login(@RequestParam String username,@RequestParam String password) {
-        log.info("username==>{},password==>{}",username,password);
+    public ResponseResult login(@RequestParam String username, @RequestParam String password) {
+        log.info("username==>{},password==>{}", username, password);
         //判断用户密码是否正确
-        User user=userService.login(username,password);
-        if (user!=null){
+        User user = userService.login(username, password);
+        if (user != null) {
             //生成token,返回给前端
-            String token= TokenUtils.generateToken(user);
+            String token = TokenUtils.generateToken(user);
             //获取登陆用户的信息
-            User loginUser=userService.getByUserName(username);
-            Map<String, Object> data=new HashMap<>();
-            data.put("token",token);
-            data.put("userInfo",loginUser);
-            return ResponseResult.ok("登录成功",data);
+            User loginUser = userService.getByUserName(username);
+            Map<String, Object> data = new HashMap<>();
+            data.put("token", token);
+            data.put("userInfo", loginUser);
+            return ResponseResult.ok("登录成功", data);
         }
         log.error("用户登录,密码错误");
         return ResponseResult.error("登录失败");
@@ -52,13 +52,13 @@ public class UserController {
      * 用户注册
      */
     @PostMapping("/register")
-    public ResponseResult register(@RequestBody User user){
+    public ResponseResult register(@RequestBody User user) {
         log.info("用户注册:user==>{}", JSON.toJSONString(user));
-        if (Objects.isNull(user)){
+        if (Objects.isNull(user)) {
             log.error("用户注册,传入参数为空");
             return ResponseResult.error("传入参数为空");
         }
-        if (userService.add(user)){
+        if (userService.add(user)) {
             return ResponseResult.ok("用户注册成功");
         }
         return ResponseResult.error("用户注册失败");
@@ -68,12 +68,12 @@ public class UserController {
      * 判断用户名是否重复
      */
     @GetMapping("/isRepeat")
-    public boolean isRepeat(@RequestParam String username){
-        if (Objects.isNull(username)){
+    public boolean isRepeat(@RequestParam String username) {
+        if (Objects.isNull(username)) {
             log.error("判断用户名是否重复传入参数为空");
             return true;
         }
-        log.info("判断用户名是否重复,username==>{}",username);
+        log.info("判断用户名是否重复,username==>{}", username);
         return userService.isRepeat(username);
     }
 
@@ -82,11 +82,17 @@ public class UserController {
      * 需要token
      */
     @PostMapping("/update")
-    public ResponseResult update(@RequestBody User user){
-        if (userService.update(user)){
+    public ResponseResult update(@RequestBody User user) {
+        if (userService.update(user)) {
             return ResponseResult.ok("修改用户信息成功");
         }
         return ResponseResult.error("修改用户信息失败");
+    }
+
+    @GetMapping("/test")
+    public ResponseResult test(){
+        userService.test();
+        return ResponseResult.ok("查询成功");
     }
 
 }

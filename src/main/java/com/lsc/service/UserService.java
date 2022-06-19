@@ -20,4 +20,6 @@ public interface UserService extends IService<User> {
     boolean add(User user);
 
     String getStatus(String token);
+
+    void test();
 }

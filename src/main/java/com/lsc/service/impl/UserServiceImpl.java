@@ -108,4 +108,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         return user.getStatus();
     }
+
+    /**
+     * 测试全局异常处理
+     */
+    @Override
+    public void test() {
+        throw new RuntimeException("RuntimeException");
+    }
 }

@@ -24,17 +24,13 @@ public class SchoolController {
     private final SchoolServiceImpl schoolService;
 
     @PostMapping("/add")
-    public ResponseResult saveSchool(@RequestParam String schoolName){
-        if (Objects.isNull(schoolName)){
+    public ResponseResult saveSchool(@RequestParam String schoolName) {
+        if (Objects.isNull(schoolName)) {
             log.error("新增学校传入参数为空");
             return ResponseResult.error("传入参数为空");
         }
-        log.info("新增学校,schoolName==>{}",schoolName);
-        try {
-            schoolService.add(schoolName);
-        }catch (RuntimeException e){
-            return ResponseResult.error(e.getMessage());
-        }
+        log.info("新增学校,schoolName==>{}", schoolName);
+        schoolService.add(schoolName);
         return ResponseResult.ok("新增学校成功");
     }
 
@@ -53,5 +49,4 @@ public class SchoolController {
         log.info("查询学校是否重复,schoolName==>{}",schoolName);
        return schoolService.isRepeat(schoolName);
     }
-
 }
