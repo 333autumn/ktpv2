@@ -2,6 +2,7 @@ package com.lsc.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.gson.Gson;
 import com.lsc.eneity.Annex;
 import com.lsc.mapper.AnnexMapper;
 import com.lsc.service.AnnexService;
@@ -11,6 +12,7 @@ import com.qiniu.http.Response;
 import com.qiniu.storage.Configuration;
 import com.qiniu.storage.Region;
 import com.qiniu.storage.UploadManager;
+import com.qiniu.storage.model.DefaultPutRet;
 import com.qiniu.util.Auth;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,9 +31,9 @@ import java.io.InputStream;
 public class AnnexServiceImpl extends ServiceImpl<AnnexMapper, Annex>  implements AnnexService {
 
     //七牛云ak
-    private static final String ACCESS_KEY = "Ug5tBZE2zCBoEkiq8m0wLaVtF83xkaqAtQHzo3Ss";
+    private static final String ACCESS_KEY = "18DymQGyuR9H0ABb50ocntJ3TdSjqVX1zpVGQBqT";
     //七牛云sk
-    private static final String SECRET_KEY = "Ug5tBZE2zCBoEkiq8m0wLaVtF83xkaqAtQHzo3Ss";
+    private static final String SECRET_KEY = "qNIKHwKiy3M3ETTW2rT-FEQOh7spdiCKO7LufbxZ";
     //七牛云存储空间名称
     private static final String BUCKET = "ktp";
 
@@ -63,11 +65,16 @@ public class AnnexServiceImpl extends ServiceImpl<AnnexMapper, Annex>  implement
             Response res = uploadManager.put(inputStream, fileName, token, null, null);
             //打印返回信息
             log.info("上传文件到七牛云返回信息==>{}", JSON.toJSONString(res));
+            //解析上传成功的结果
+            DefaultPutRet putRet = new Gson().fromJson(res.bodyString(), DefaultPutRet.class);
+            System.out.println(putRet.key);
+            log.info("key==>{}",putRet.key);
+            log.info("hash==>{}",putRet.hash);
         } catch (IOException e) {
             e.printStackTrace();
             return ResponseResult.error("上传文件失败");
         }
-        return ResponseResult.ok("上传文件成功");
+        return ResponseResult.ok("上传文件成功", "http://rdqbc06ar.hd-bkt.clouddn.com/" +fileName);
     }
 
 }
