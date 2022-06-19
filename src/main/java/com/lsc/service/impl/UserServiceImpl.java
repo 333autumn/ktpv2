@@ -31,12 +31,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         queryWrapper.eq(User::getUsername,username);
         User user=getOne(queryWrapper);
         if (Objects.isNull(user)){
-            return null;
+            throw new RuntimeException("用户不存在,登录失败");
         }
-        if (Objects.equals(user.getPassword(), password)){
-            return user;
+        if (!Objects.equals(user.getPassword(), password)){
+            throw new RuntimeException("密码错误,登录失败");
         }
-        return null;
+        return user;
     }
 
     /**

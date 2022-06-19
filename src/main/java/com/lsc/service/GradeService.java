@@ -9,4 +9,5 @@ import com.lsc.eneity.Grade;
  * @date 2022/6/15 15:11
  */
 public interface GradeService extends IService<Grade> {
+    boolean correct(Grade grade);
 }

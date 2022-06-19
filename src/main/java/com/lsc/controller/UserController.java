@@ -45,7 +45,7 @@ public class UserController {
             return ResponseResult.ok("登录成功", data);
         }
         log.error("用户登录,密码错误");
-        return ResponseResult.error("登录失败");
+        return ResponseResult.error("密码错误,登录失败");
     }
 
     /**

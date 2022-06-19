@@ -53,6 +53,9 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
                 .eq(CourseMembers::getCourseStatus,courseStatus);
 
         List<CourseMembers> courseMembers = courseMembersService.list(courseMembersQW);
+        if (courseMembers.size()==0){
+            return new ArrayList<>();
+        }
         //获取所有用户加入的课程id
         List<String> courseIds = courseMembers
                 .stream()
