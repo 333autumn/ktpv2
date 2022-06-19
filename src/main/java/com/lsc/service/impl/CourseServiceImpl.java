@@ -161,13 +161,15 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
 
     /**
      * 加入课程
-     * @param courseId 课程id
+     * @param addCourseCode 加课码
      * @param userId   用户id
      */
     @Override
-    public void joinCourse(String courseId, String userId) {
-        //判断课程是否存在
-        Course course=getById(courseId);
+    public void joinCourse(String addCourseCode, String userId) {
+        //根据加课码判断课程是否存在
+        LambdaQueryWrapper<Course> queryWrapper=new LambdaQueryWrapper<>();
+        queryWrapper.eq(Course::getAddCourseCode,addCourseCode);
+        Course course=getOne(queryWrapper);
         if (Objects.isNull(course)){
             throw new RuntimeException("课程不存在,无法加入课程");
         }
@@ -177,6 +179,8 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
         if (Objects.isNull(user)) {
             throw new RuntimeException("用户不存在,无法加入课程");
         }
+        //获取刚才根据加课码查到的课程的课程id
+        String courseId=course.getCourseId();
 
         //判断用户是否已经加入课程
         LambdaQueryWrapper<CourseMembers> courseMembersQW=new LambdaQueryWrapper<>();
@@ -196,7 +200,8 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
         CourseMembers courseMembers = new CourseMembers();
         courseMembers.setCourseId(courseId);
         courseMembers.setUserId(userId);
-        courseMembers.setStatus(user.getStatus());
+        courseMembers.setUserStatus(user.getStatus());
+        courseMembers.setCourseStatus(Constant.CourseStatus.NORMAL);
         courseMembers.setCreateTime(DateUtils.now());
         courseMembers.setUpdateTime(DateUtils.now());
 
@@ -216,7 +221,7 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
         //根据课程id获取所有课程信息
         LambdaQueryWrapper<CourseMembers> qw = new LambdaQueryWrapper<>();
         qw.eq(CourseMembers::getCourseId, courseId)
-                .eq(CourseMembers::getStatus, status);
+                .eq(CourseMembers::getUserStatus, status);
 
         List<CourseMembers> courseMembers = courseMembersService.list(qw);
 

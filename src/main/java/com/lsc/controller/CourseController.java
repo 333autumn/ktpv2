@@ -136,13 +136,13 @@ public class CourseController {
      * 加入课程
      */
     @PostMapping("/joinCourse")
-    public ResponseResult joinCourse(@RequestParam String courseId, @RequestParam String userId) {
-        if (Objects.isNull(courseId) || Objects.isNull(userId)) {
+    public ResponseResult joinCourse(@RequestParam String addCourseCode, @RequestParam String userId) {
+        if (Objects.isNull(addCourseCode) || Objects.isNull(userId)) {
             return ResponseResult.error("传入参数为空");
         }
-        log.info("加入课程传入参数:courseId==>{},userId==>{}", courseId, userId);
+        log.info("加入课程传入参数:addCourseCode==>{},userId==>{}", addCourseCode, userId);
         try {
-            courseService.joinCourse(courseId, userId);
+            courseService.joinCourse(addCourseCode, userId);
             log.info("加入课程成功");
             return ResponseResult.ok("加入课程成功");
         } catch (RuntimeException e) {

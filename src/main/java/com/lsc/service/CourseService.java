@@ -23,5 +23,5 @@ public interface CourseService extends IService<Course> {
 
     boolean isRepeatedCode(String addCourseCode);
 
-    void joinCourse(String courseId, String userId);
+    void joinCourse(String addCourseCode, String userId);
 }

@@ -23,7 +23,8 @@ public class CourseMembers {
     private String id;
     private String courseId; //课程号
     private String userId; //用户id
-    private String status; //0代表学生,1代表老师
+    private String userStatus; //0代表学生,1代表老师
+    private String courseStatus;  //0代表正常,1代表归档
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
