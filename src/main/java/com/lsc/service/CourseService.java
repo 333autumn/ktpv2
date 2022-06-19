@@ -15,7 +15,7 @@ public interface CourseService extends IService<Course> {
 
     List<Course> selectAllCourses(String id,String courseStatus);
 
-    void archiveCourse(String courseId);
+    void archiveCourse(String courseId, String userId);
 
     ResponseResult selectAllMembers(String courseId);
 
@@ -24,4 +24,8 @@ public interface CourseService extends IService<Course> {
     boolean isRepeatedCode(String addCourseCode);
 
     void joinCourse(String addCourseCode, String userId);
+
+    void archiveCourseALL(String courseId);
+
+    boolean deleteCourse(String courseId, String userId);
 }

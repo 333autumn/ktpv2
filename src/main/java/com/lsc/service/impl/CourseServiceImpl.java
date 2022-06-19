@@ -64,25 +64,34 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
     }
 
     /**
-     * 课程归档
+     * 课程归档自己
      * 将课程的状态改为归档
-     * 只有教师可以归档课程
      */
     @Override
-    public void archiveCourse(String courseId) {
+    public void archiveCourse(String courseId, String userId) {
         //根据课程id查询对应的课程
         LambdaQueryWrapper<Course> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Course::getCourseId, courseId);
+        queryWrapper.eq(Course::getCourseId,courseId);
         Course course = getOne(queryWrapper);
+
         if (course == null) {
             throw new RuntimeException("没有对应的课程");
         }
-        if (course.getCourseStatus().equals(Constant.CourseStatus.ARCHIVE)) {
+        //查询对应的关联表
+
+        LambdaQueryWrapper<CourseMembers> queryWrapper1=new LambdaQueryWrapper<>();
+        queryWrapper1.eq(CourseMembers::getCourseId,courseId)
+                .eq(CourseMembers::getUserId,userId);
+
+        CourseMembers courseMembers=courseMembersService.getOne(queryWrapper1);
+        if (courseMembers.getCourseStatus().equals(Constant.CourseStatus.ARCHIVE)){
             throw new RuntimeException("课程已经归档");
         }
-        course.setCourseStatus(Constant.CourseStatus.ARCHIVE);
+
+        courseMembers.setCourseStatus(Constant.CourseStatus.ARCHIVE);
+
         //更新状态
-        if (!updateById(course)) {
+        if (!courseMembersService.updateById(courseMembers)) {
             throw new RuntimeException("课程归档失败");
         }
     }
@@ -209,6 +218,33 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
         if (!courseMembersService.save(courseMembers)) {
             throw new RuntimeException("数据库发生错误,加入课程失败");
         }
+    }
+
+    /**
+     * 课程归档全部
+     * @param courseId 课程id
+     */
+    @Override
+    public void archiveCourseALL(String courseId) {
+
+    }
+
+    /**
+     * 删除课程
+     * @param courseId 课程id
+     * @param userId 用户id
+     */
+    @Override
+    public boolean deleteCourse(String courseId, String userId) {
+        //判断用户是否是教师
+        User user=userService.getById(userId);
+        if (user==null){
+            return false;
+        }
+        if (!user.getStatus().equals(Constant.UserStatus.TEACHER)){
+            return false;
+        }
+        return removeById(courseId);
     }
 
     /**

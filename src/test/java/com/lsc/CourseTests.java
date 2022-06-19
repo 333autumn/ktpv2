@@ -21,8 +21,8 @@ public class CourseTests {
     /**
      * 测试课程归档
      */
-    @Test
-    public void test1(){
-        System.out.println(courseController.archiveCourse("333"));
-    }
+//    @Test
+//    public void test1(){
+//        System.out.println(courseController.archiveCourse("333"));
+//    }
 }

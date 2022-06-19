@@ -22,7 +22,7 @@ import java.util.Date;
 public class Grade {
     @TableId("grade_id")
     private String gradeId;
-    private String courseId; //课程id
+    private String taskId; //课程id
     private String studentId; //学生id
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;

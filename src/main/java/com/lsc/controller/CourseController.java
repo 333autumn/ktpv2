@@ -5,6 +5,7 @@ import com.lsc.service.impl.CourseServiceImpl;
 import com.lsc.service.impl.UserServiceImpl;
 import com.lsc.utils.Constant;
 import com.lsc.utils.ResponseResult;
+import com.lsc.utils.TokenUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -60,9 +61,13 @@ public class CourseController {
 
     /**
      * 编辑课程
+     * 只有教师可以编辑课程
      */
     @PostMapping("/editCourse")
     public ResponseResult editCourses(@RequestBody Course course,@RequestHeader String token) {
+        if (token.length()==0){
+            return ResponseResult.error("请求未携带token");
+        }
         //根据token判断请求用户的身份
         if (!userService.getStatus(token).equals("1")){
             return ResponseResult.error("只有教师可以编辑课程");
@@ -75,31 +80,58 @@ public class CourseController {
 
     /**
      * 删除课程
+     * 教师可以删除自己创建和加入的课程
      */
     @PostMapping("/deleteCourse")
-    public ResponseResult deleteCourse(@RequestParam String courseId) {
+    public ResponseResult deleteCourse(@RequestParam String courseId,@RequestHeader String token) {
+        if (token.length()==0){
+            return ResponseResult.error("请求未携带token");
+        }
         if (Objects.isNull(courseId)) {
             log.error("删除课程传入参数为空");
             return ResponseResult.error("传入参数为空");
         }
-        log.info("删除课程,courseId==>{}",courseId);
-        if (courseService.removeById(courseId)) {
+        //根据token获取用户id
+        String userId= TokenUtils.getUserId(token);
+        log.info("删除课程,courseId==>{},userId==>{}",courseId,userId);
+        if (courseService.deleteCourse(courseId,userId)) {
             return ResponseResult.ok("删除课程成功");
         }
         return ResponseResult.error("删除课程失败");
     }
 
     /**
-     * 课程归档
+     * 课程归档自己
      */
     @PostMapping("/archiveCourse")
-    public ResponseResult archiveCourse(@RequestParam("courseId") String courseId) {
+    public ResponseResult archiveCourse(@RequestParam String courseId,@RequestParam String userId) {
         try {
-            courseService.archiveCourse(courseId);
+            courseService.archiveCourse(courseId,userId);
         } catch (RuntimeException e) {
             return ResponseResult.error("课程归档失败");
         }
         return ResponseResult.ok("课程归档成功");
+    }
+
+    /**
+     * 课程归档全部
+     * 只有教师可以归档全部
+     */
+    @PostMapping("/archiveCourseAll")
+    public ResponseResult archiveCourseAll(@RequestParam String courseId,@RequestHeader String token){
+        if (token.length()==0){
+            return ResponseResult.error("请求未携带token");
+        }
+        //根据token判断用户是否是教师
+        if (!userService.getStatus(token).equals("1")){
+            return ResponseResult.error("只有教师可以归档全部");
+        }
+        try {
+            courseService.archiveCourseALL(courseId);
+        } catch (RuntimeException e) {
+            return ResponseResult.error("课程归档全部失败");
+        }
+        return ResponseResult.ok("课程归档全部成功");
     }
 
     /**
@@ -121,6 +153,9 @@ public class CourseController {
      */
     @PostMapping("/createCourse")
     public ResponseResult createCourse(@RequestBody Course course,@RequestHeader String token) {
+        if (token.length()==0){
+            return ResponseResult.error("请求未携带token");
+        }
         //根据token判断请求用户的身份
         if (!userService.getStatus(token).equals("1")){
             return ResponseResult.error("只有教师可以创建课程");
@@ -150,4 +185,5 @@ public class CourseController {
             return ResponseResult.error(e.getMessage());
         }
     }
+
 }
