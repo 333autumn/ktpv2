@@ -94,10 +94,13 @@ public class CourseController {
         //根据token获取用户id
         String userId= TokenUtils.getUserId(token);
         log.info("删除课程,courseId==>{},userId==>{}",courseId,userId);
-        if (courseService.deleteCourse(courseId,userId)) {
+        try {
+            courseService.deleteCourse(courseId,userId);
             return ResponseResult.ok("删除课程成功");
+        }catch (RuntimeException e){
+            log.error("删除课程失败,==>{}",e.getMessage());
+            return ResponseResult.error(e.getMessage());
         }
-        return ResponseResult.error("删除课程失败");
     }
 
     /**

@@ -24,6 +24,7 @@ public class Annex {
     private String taskId; //作业id
     private String ownerId; //所有者id
     private String path; //附件内容地址
+    private String remarks;  //详情
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")

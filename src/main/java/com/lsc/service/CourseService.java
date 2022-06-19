@@ -27,5 +27,5 @@ public interface CourseService extends IService<Course> {
 
     void archiveCourseALL(String courseId);
 
-    boolean deleteCourse(String courseId, String userId);
+    void deleteCourse(String courseId, String userId);
 }

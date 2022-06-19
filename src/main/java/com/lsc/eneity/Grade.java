@@ -24,6 +24,7 @@ public class Grade {
     private String gradeId;
     private String taskId; //课程id
     private String studentId; //学生id
+    private String grade;  //作业分数
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")

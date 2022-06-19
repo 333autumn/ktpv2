@@ -28,9 +28,9 @@ public class TaskController {
 
     @PostMapping("/createTask")
     public ResponseResult createTask(@RequestHeader String token, @RequestBody Task task) {
-        if (Objects.isNull(token)) {
+        if (token.length() == 0) {
             log.error("token请求头为空,发布作业失败");
-            return ResponseResult.error("token请求头为空,发布作业失败");
+            return ResponseResult.error("未携带token");
         }
         //根据token判断请求用户的身份
         if (!userService.getStatus(token).equals("1")) {

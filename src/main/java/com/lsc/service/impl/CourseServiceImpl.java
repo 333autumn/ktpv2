@@ -235,16 +235,16 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
      * @param userId 用户id
      */
     @Override
-    public boolean deleteCourse(String courseId, String userId) {
+    public void deleteCourse(String courseId, String userId) {
         //判断用户是否是教师
         User user=userService.getById(userId);
         if (user==null){
-            return false;
+            throw new RuntimeException("用户不存在");
         }
         if (!user.getStatus().equals(Constant.UserStatus.TEACHER)){
-            return false;
+            throw new RuntimeException("只有教师可以删除课程");
         }
-        return removeById(courseId);
+        removeById(courseId);
     }
 
     /**
