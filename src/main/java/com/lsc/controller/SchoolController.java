@@ -24,7 +24,7 @@ public class SchoolController {
     private final SchoolServiceImpl schoolService;
 
     @PostMapping("/add")
-    public ResponseResult saveSchool(@RequestParam("schoolName") String schoolName){
+    public ResponseResult saveSchool(@RequestParam String schoolName){
         if (Objects.isNull(schoolName)){
             log.error("新增学校传入参数为空");
             return ResponseResult.error("传入参数为空");

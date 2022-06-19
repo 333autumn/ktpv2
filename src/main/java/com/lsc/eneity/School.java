@@ -2,6 +2,7 @@ package com.lsc.eneity;
 
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
@@ -20,7 +21,7 @@ import java.util.Date;
 @AllArgsConstructor
 @TableName("school")
 public class School {
-    @TableId("school_id")
+    @TableId(value = "school_id")
     private String schoolId;
     private String schoolName; //学校名
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")

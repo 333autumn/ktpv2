@@ -27,7 +27,7 @@ public class SchoolTests {
      */
     @Test
     public void testAddSchool(){
-        String school="上海交通大学";
+        String school="龙兴理工大学";
         System.out.println(schoolController.saveSchool(school));
     }
 

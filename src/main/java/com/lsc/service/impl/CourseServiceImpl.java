@@ -248,6 +248,48 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
     }
 
     /**
+     * 学生退课
+     * @param courseId 课程id
+     * @param userId 用户id
+     */
+    @Override
+    public void exitCourse(String courseId, String userId) {
+        LambdaQueryWrapper<CourseMembers> queryWrapper=new LambdaQueryWrapper<>();
+        queryWrapper.eq(CourseMembers::getCourseId,courseId)
+                .eq(CourseMembers::getUserId,userId);
+
+        if (!courseMembersService.remove(queryWrapper)){
+            throw new RuntimeException("数据库错误,退课失败");
+        }
+
+    }
+
+    /**
+     * 恢复归档的课程
+     * @param courseId 课程id
+     * @param userId 用户id
+     */
+    @Override
+    public void recoverCourse(String courseId, String userId) {
+        LambdaQueryWrapper<CourseMembers> queryWrapper=new LambdaQueryWrapper<>();
+        queryWrapper.eq(CourseMembers::getCourseId,courseId)
+                .eq(CourseMembers::getUserId,userId);
+
+        CourseMembers courseMembers=courseMembersService.getOne(queryWrapper);
+
+        if (Objects.isNull(courseMembers)){
+            throw new RuntimeException("用户未加入该课程");
+        }
+
+        courseMembers.setCourseStatus(Constant.CourseStatus.NORMAL);
+
+        if (!courseMembersService.updateById(courseMembers)){
+            throw new RuntimeException("数据库发生错误,恢复归档课程失败");
+        }
+
+    }
+
+    /**
      * 查询课程下某个身份的所有成员
      * @param status 用户身份
      * @param courseId 课程id

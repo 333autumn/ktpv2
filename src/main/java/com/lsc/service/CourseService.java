@@ -28,4 +28,8 @@ public interface CourseService extends IService<Course> {
     void archiveCourseALL(String courseId);
 
     void deleteCourse(String courseId, String userId);
+
+    void exitCourse(String courseId, String userId);
+
+    void recoverCourse(String courseId, String userId);
 }

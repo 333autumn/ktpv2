@@ -5,6 +5,7 @@ server:
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
+    # 远程数据库
     url: jdbc:mysql://124.221.167.103:3306/ktp?allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8
     username: root
     password: Aa@123456
