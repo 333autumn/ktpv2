@@ -7,10 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.UUID;
-
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -20,6 +16,14 @@ public class AnnexController {
     private final AnnexServiceImpl annexService;
 
     /**
+     * 上传文件测试
+     */
+    @PostMapping("/upload")
+    public ResponseResult upload(MultipartFile file){
+        return annexService.upload(file);
+    }
+
+    /**
      * 用户上传附件
      */
     @PostMapping("/uploadAnnex")
@@ -27,15 +31,17 @@ public class AnnexController {
             ,@RequestParam String userId){
         log.info("用户上传附件:taskId==>{},userId==>{}",taskId,userId);
         return annexService.uploadAnnex(file,taskId,userId);
-
     }
 
+
     /**
-     * 上传文件测试
+     * 用户下载附件
+     * 返回一个下载连接
      */
-    @PostMapping("/upload")
-    public ResponseResult upload(MultipartFile file){
-        return annexService.upload(file);
+    //TODO
+    @GetMapping("/download")
+    public ResponseResult download(){
+        return null;
     }
 
 }

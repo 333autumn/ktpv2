@@ -1,7 +1,9 @@
 package com.lsc.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.lsc.eneity.Grade;
 import com.lsc.eneity.Task;
+import com.lsc.eneity.TaskVo;
 
 import java.util.List;
 
@@ -13,5 +15,7 @@ import java.util.List;
 public interface TaskService extends IService<Task> {
     boolean createTask(Task task);
 
-    List<Task> selectAll(String courseId);
+    List<TaskVo> selectAll(String courseId, String userId);
+
+    boolean correct(Grade grade);
 }

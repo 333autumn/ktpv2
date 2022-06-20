@@ -1,9 +1,11 @@
 package com.lsc.controller;
 
 import com.lsc.eneity.Task;
+import com.lsc.eneity.TaskVo;
 import com.lsc.service.impl.TaskServiceImpl;
 import com.lsc.service.impl.UserServiceImpl;
 import com.lsc.utils.ResponseResult;
+import com.lsc.utils.TokenUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -42,9 +44,13 @@ public class TaskController {
     }
 
     @GetMapping("/selectAll")
-    public ResponseResult selectAll(String courseId) {
-        log.info("获取所有作业,courseId==>{}", courseId);
-        List<Task> tasks = taskService.selectAll(courseId);
+    public ResponseResult selectAll(@RequestParam String courseId, @RequestHeader String token) {
+        if (token.length() == 0) {
+            return ResponseResult.error("请求未携带token");
+        }
+        String userId= TokenUtils.getUserId(token);
+        log.info("获取所有作业,courseId==>{},userId==>{}", courseId,userId);
+        List<TaskVo> tasks = taskService.selectAll(courseId,userId);
         return ResponseResult.ok("获取所有作业成功", tasks);
     }
 
