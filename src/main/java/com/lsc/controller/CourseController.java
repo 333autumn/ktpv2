@@ -197,4 +197,12 @@ public class CourseController {
         return ResponseResult.ok("恢复归档课程成功");
     }
 
+    /**
+     * 通过课程id获取课程信息
+     */
+    @GetMapping("/selectByCourseId")
+    public ResponseResult selectByCourseId(String courseId){
+        return courseService.selectByCourseId(courseId);
+    }
+
 }

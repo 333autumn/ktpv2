@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import com.lsc.eneity.Annex;
 import com.lsc.mapper.AnnexMapper;
 import com.lsc.service.AnnexService;
+import com.lsc.utils.DateUtils;
 import com.lsc.utils.PathUtils;
 import com.lsc.utils.ResponseResult;
 import com.qiniu.http.Response;
@@ -38,7 +39,7 @@ public class AnnexServiceImpl extends ServiceImpl<AnnexMapper, Annex>  implement
     private static final String BUCKET = "ktp";
 
     /**
-     * 附件上传
+     * 上传文件测试
      */
     @Override
     public ResponseResult upload(MultipartFile file) {
@@ -48,6 +49,39 @@ public class AnnexServiceImpl extends ServiceImpl<AnnexMapper, Annex>  implement
         String fileName = PathUtils.generateFilePath(originalFilename);
         log.info("文件保存路径为==>{}", fileName);
         return uploadOss(file, fileName);
+    }
+
+    /**
+     * 上传附件
+     * @param file 文件
+     * @param taskId 作业id
+     * @param userId 上传人id
+     */
+    @Override
+    public ResponseResult uploadAnnex(MultipartFile file, String taskId, String userId) {
+        //获取原始文件名
+        String originalFilename=file.getOriginalFilename();
+        //使用文件名生成工具类生成不重复的文件名
+        String fileName = PathUtils.generateFilePath(originalFilename);
+        //文件上传到七牛云进行保存
+        ResponseResult responseResult=uploadOss(file,taskId+"/"+fileName);
+        if (responseResult.getCode()==500){//状态码为500说明上传失败
+            return ResponseResult.error(responseResult.getMsg());
+        }
+        //如果文件在七牛云保存成功,将文件路径保存到数据库中
+        //获取文件路径
+        String path=responseResult.getData().toString();
+        //封装Annex对象
+        Annex annex=new Annex();
+        annex.setTaskId(taskId);
+        annex.setOwnerId(userId);
+        annex.setPath(path);
+        annex.setCreateTime(DateUtils.now());
+        annex.setUpdateTime(DateUtils.now());
+        if (save(annex)){
+            return ResponseResult.ok("文件保存成功",path);
+        }
+        return ResponseResult.error("文件保存失败");
     }
 
     /**
@@ -68,13 +102,12 @@ public class AnnexServiceImpl extends ServiceImpl<AnnexMapper, Annex>  implement
             //解析上传成功的结果
             DefaultPutRet putRet = new Gson().fromJson(res.bodyString(), DefaultPutRet.class);
             System.out.println(putRet.key);
-            log.info("key==>{}",putRet.key);
-            log.info("hash==>{}",putRet.hash);
+            log.info("key==>{}", putRet.key);
+            log.info("hash==>{}", putRet.hash);
         } catch (IOException e) {
             e.printStackTrace();
             return ResponseResult.error("上传文件失败");
         }
-        return ResponseResult.ok("上传文件成功", "http://rdqbc06ar.hd-bkt.clouddn.com/" +fileName);
+        return ResponseResult.ok("上传文件成功", "http://rdqbc06ar.hd-bkt.clouddn.com/" + fileName);
     }
-
 }

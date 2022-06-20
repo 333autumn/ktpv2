@@ -13,4 +13,5 @@ import org.springframework.web.multipart.MultipartFile;
 public interface AnnexService extends IService<Annex> {
      ResponseResult upload(MultipartFile file);
 
+    ResponseResult uploadAnnex(MultipartFile file, String taskId, String userId);
 }

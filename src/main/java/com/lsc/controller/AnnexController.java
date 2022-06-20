@@ -19,48 +19,22 @@ public class AnnexController {
 
     private final AnnexServiceImpl annexService;
 
-//    /**
-//     * 上传附件
-//     */
-//    @PostMapping("/upload")
-//    public ResponseResult uploadFile(MultipartFile file, @RequestParam String taskId, @RequestParam String userId) {
-//        //获取原始文件名称
-//        String originName = file.getOriginalFilename();
-//
-//        if (!originName.contains(".")) {
-//            log.error("上传附件为空");
-//            return ResponseResult.error("上传附件不能为空");
-//        }
-//
-//        //获取文件名后缀
-//        String last = originName.split("\\.")[1];
-//
-//        //拼接真实路径
-//        String realPath = "D:\\ktpFiles";
-//        log.info("文件真实路径为==>{}", realPath);
-//
-//        File folder = new File(realPath);
-//        if (!folder.exists()) {
-//            folder.mkdirs();
-//        }
-//        //拼接新文件名
-//        String newName = UUID.randomUUID() + "." + last;
-//        log.info("新文件名为==>{}", newName);
-//
-//        log.info("文件路径为==>{}", realPath + "\\" + newName);
-//
-//        //保存文件
-//        try {
-//            file.transferTo(new File(folder, newName));
-//            return ResponseResult.ok("文件上传成功");
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            return ResponseResult.error("文件上传失败");
-//        }
-//    }
+    /**
+     * 用户上传附件
+     */
+    @PostMapping("/uploadAnnex")
+    public ResponseResult uploadAnnex(@RequestPart("file") MultipartFile file,@RequestParam String taskId
+            ,@RequestParam String userId){
+        log.info("用户上传附件:taskId==>{},userId==>{}",taskId,userId);
+        return annexService.uploadAnnex(file,taskId,userId);
 
+    }
+
+    /**
+     * 上传文件测试
+     */
     @PostMapping("/upload")
-    public ResponseResult uploadImg(MultipartFile file){
+    public ResponseResult upload(MultipartFile file){
         return annexService.upload(file);
     }
 

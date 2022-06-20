@@ -62,9 +62,13 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
                 .stream()
                 .map(CourseMembers::getCourseId)
                 .collect(Collectors.toList());
+
         //根据课程id查询对应的课程信息
+        //根据学年和学期排序返回结果
         LambdaQueryWrapper<Course> courseQW = new LambdaQueryWrapper<>();
-        courseQW.in(Course::getCourseId, courseIds);
+        courseQW.in(Course::getCourseId, courseIds)
+                .orderByDesc(Course::getSemesterYear)
+                .orderByDesc(Course::getSemester);
 
         return list(courseQW);
     }
@@ -308,6 +312,16 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
             throw new RuntimeException("数据库发生错误,恢复归档课程失败");
         }
 
+    }
+
+    /**
+     * 通过课程id获取课程信息
+     * @param courseId 课程id
+     */
+    @Override
+    public ResponseResult selectByCourseId(String courseId) {
+        Course course=getById(courseId);
+        return ResponseResult.ok("查询课程成功",course);
     }
 
     /**

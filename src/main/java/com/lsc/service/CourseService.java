@@ -32,4 +32,6 @@ public interface CourseService extends IService<Course> {
     void exitCourse(String courseId, String userId);
 
     void recoverCourse(String courseId, String userId);
+
+    ResponseResult selectByCourseId(String courseId);
 }
