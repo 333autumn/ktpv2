@@ -2,6 +2,7 @@ package com.lsc.controller;
 
 import com.lsc.eneity.Task;
 import com.lsc.eneity.TaskVo;
+import com.lsc.service.impl.AnnexServiceImpl;
 import com.lsc.service.impl.TaskServiceImpl;
 import com.lsc.service.impl.UserServiceImpl;
 import com.lsc.utils.ResponseResult;
@@ -9,6 +10,7 @@ import com.lsc.utils.TokenUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -26,6 +28,8 @@ public class TaskController {
     private final UserServiceImpl userService;
 
     private final TaskServiceImpl taskService;
+
+    private final AnnexServiceImpl annexService;
 
     @PostMapping("/createTask")
     public ResponseResult createTask(@RequestHeader String token, @RequestBody Task task) {
@@ -52,6 +56,19 @@ public class TaskController {
         log.info("获取所有作业,courseId==>{},userId==>{}", courseId,userId);
         List<TaskVo> tasks = taskService.selectAll(courseId,userId);
         return ResponseResult.ok("获取所有作业成功", tasks);
+    }
+
+
+    /**
+     * 提交作业
+     */
+    @PostMapping("/submit")
+    public ResponseResult submit(MultipartFile file,@RequestParam String taskId,@RequestParam String userId,
+                                 @RequestParam String remarks){
+        annexService.submit(file,taskId,userId,remarks);
+        //提交作业成功后,当前作业的提交数量+1
+        taskService.addSubmitNum(taskId);
+        return ResponseResult.ok("提交作业成功");
     }
 
 }

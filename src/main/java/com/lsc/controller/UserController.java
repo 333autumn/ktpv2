@@ -104,4 +104,13 @@ public class UserController {
         return userService.getInfoById(userId);
     }
 
+    /**
+     * 根据id获取token
+     */
+    @GetMapping("/getToken")
+    public String getToken(String userId) {
+        User user = userService.getById(userId);
+        return TokenUtils.generateToken(user);
+    }
+
 }

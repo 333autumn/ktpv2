@@ -90,4 +90,24 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
         return false;
     }
 
+    /**
+     * 指定作业的提交数量+1
+     * @param taskId 作业id
+     */
+    @Override
+    public void addSubmitNum(String taskId) {
+        Task task=getById(taskId);
+
+        if (Objects.isNull(task)){
+            throw new RuntimeException("指定作业不存在");
+        }
+
+        task.setSubmitNum(task.getSubmitNum()+1);
+
+        if (!updateById(task)){
+            throw new RuntimeException("作业提交数量增加失败");
+        }
+
+    }
+
 }

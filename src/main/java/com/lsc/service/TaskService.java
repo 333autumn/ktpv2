@@ -18,4 +18,6 @@ public interface TaskService extends IService<Task> {
     List<TaskVo> selectAll(String courseId, String userId);
 
     boolean correct(Grade grade);
+
+    void addSubmitNum(String taskId);
 }

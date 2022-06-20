@@ -85,6 +85,40 @@ public class AnnexServiceImpl extends ServiceImpl<AnnexMapper, Annex>  implement
     }
 
     /**
+     * 提交作业
+     * @param file 文件
+     * @param taskId 作业id
+     * @param userId 用户id
+     * @param remarks 提交详情(除了附件之外的文字内容)
+     */
+    @Override
+    public void submit(MultipartFile file, String taskId, String userId, String remarks) {
+        //获取原始文件名
+        String originalFilename = file.getOriginalFilename();
+        //使用文件名生成工具类生成不重复的文件名
+        String fileName = PathUtils.generateFilePath(originalFilename);
+        //文件上传到七牛云进行保存
+        ResponseResult responseResult = uploadOss(file, taskId + "/" + fileName);
+        if (responseResult.getCode() == 500) {//状态码为500说明上传失败
+            throw new RuntimeException("附件保存到七牛云失败");
+        }
+        //如果文件在七牛云保存成功,将文件路径保存到数据库中
+        //获取文件路径
+        String path = responseResult.getData().toString();
+        //封装Annex对象
+        Annex annex = new Annex();
+        annex.setTaskId(taskId);
+        annex.setOwnerId(userId);
+        annex.setPath(path);
+        annex.setRemarks(remarks);
+        annex.setCreateTime(DateUtils.now());
+        annex.setUpdateTime(DateUtils.now());
+        if (!save(annex)) {
+            throw new RuntimeException("数据库保存附件失败");
+        }
+    }
+
+    /**
      * 上传文件到七牛云
      * @param file     要上传的文件
      * @param fileName 保存到七牛云的文件名
