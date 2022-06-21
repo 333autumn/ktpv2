@@ -71,4 +71,13 @@ public class TaskController {
         return ResponseResult.ok("提交作业成功");
     }
 
+    /**
+     * 通过作业id查询作业详情
+     */
+    @GetMapping("/selectById")
+    public ResponseResult selectById(String taskId){
+        Task task=taskService.getById(taskId);
+        return ResponseResult.ok("作业查询成功",task);
+    }
+
 }
