@@ -2,15 +2,15 @@ package com.lsc.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.lsc.eneity.Grade;
-import com.lsc.eneity.Task;
-import com.lsc.eneity.TaskVo;
+import com.lsc.eneity.*;
 import com.lsc.mapper.TaskMapper;
 import com.lsc.service.TaskService;
 import com.lsc.utils.BeanCopyUtils;
 import com.lsc.utils.DateUtils;
 import lombok.RequiredArgsConstructor;
+import org.apache.ibatis.jdbc.SQL;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Objects;
@@ -26,11 +26,16 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
 
     private final GradeServiceImpl gradeService;
 
+    private final CourseServiceImpl courseService;
+
+    private final AnnexServiceImpl annexService;
+
+    private final TaskMapper taskMapper;
     /**
      * 发布作业
      */
     @Override
-    public boolean createTask(Task task) {
+    public boolean createTask(Task task, MultipartFile file,String userId) {
         //设置提交数量
         task.setSubmitNum(0);
         //设置已批改数量
@@ -40,17 +45,24 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
         //设置更新时间
         task.setUpdateTime(DateUtils.now());
         //保存作业信息
-        return save(task);
+        taskMapper.insert(task);
+
+        //获取作业id
+        String taskId=task.getTaskId();
+
+        annexService.uploadAnnex(file,taskId,userId);
+
+        return true;
     }
 
     //获取课程下的所有作业信息
     @Override
-    public List<TaskVo> selectAll(String courseId, String userId) {
+    public List<TaskListVo> selectAll(String courseId, String userId) {
         LambdaQueryWrapper<Task> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Task::getCourseId, courseId);
         List<Task> tasks=list(queryWrapper);
-        List<TaskVo> taskVos = BeanCopyUtils.copyBeanList(tasks, TaskVo.class);
-        for (TaskVo taskVo : taskVos) {
+        List<TaskListVo> taskVos = BeanCopyUtils.copyBeanList(tasks, TaskListVo.class);
+        for (TaskListVo taskVo : taskVos) {
             //根据课程id和用户id去grade表里查,结果不为空说明学生的该项作业已经批改
             LambdaQueryWrapper<Grade> gradeQW=new LambdaQueryWrapper<>();
             gradeQW.eq(Grade::getTaskId,taskVo.getTaskId())
@@ -108,6 +120,49 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
             throw new RuntimeException("作业提交数量增加失败");
         }
 
+    }
+
+    /**
+     * 根据作业id查询对应的作业
+     * 附带教师上传的附件下载地址
+     * @param taskId 作业id
+     */
+    @Override
+    public TaskDetailsVo getDetailsVoById(String taskId) {
+        Task task=getById(taskId);
+
+        if (Objects.isNull(task)){
+            throw new RuntimeException("作业id不存在,无法获取作业信息");
+        }
+
+        TaskDetailsVo taskDetailsVo = BeanCopyUtils.copyBean(task, TaskDetailsVo.class);
+
+        //根据作业id找到课程id
+        String courseId=task.getCourseId();
+        //根据课程id找到教师id
+        LambdaQueryWrapper<Course> queryWrapper=new LambdaQueryWrapper<>();
+        queryWrapper.eq(Course::getCourseId,courseId);
+
+        Course course=courseService.getOne(queryWrapper);
+
+        if (Objects.isNull(course)){
+            throw new RuntimeException("作业对应的课程不存在或已删除");
+        }
+
+        String teacherId=course.getOwnerId();
+        //根据作业id和教师id找到教师上传到该作业上的附件
+        LambdaQueryWrapper<Annex> annexLambdaQueryWrapper=new LambdaQueryWrapper<>();
+        annexLambdaQueryWrapper.eq(Annex::getTaskId,taskId)
+                .eq(Annex::getOwnerId,teacherId);
+
+        Annex annex=annexService.getOne(annexLambdaQueryWrapper);
+
+        //设置作业附件路径
+        if (Objects.nonNull(annex)){
+            taskDetailsVo.setPath(annex.getPath());
+        }
+
+        return taskDetailsVo;
     }
 
 }

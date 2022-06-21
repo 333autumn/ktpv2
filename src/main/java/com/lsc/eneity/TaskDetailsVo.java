@@ -1,5 +1,6 @@
 package com.lsc.eneity;
 
+
 import com.alibaba.fastjson.annotation.JSONField;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,14 +9,12 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 /**
- * @author lsc
- * @version 1.0
- * @date 2022/6/20 15:04
+ * 作业详情返回的作业对象
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TaskVo {
+public class TaskDetailsVo {
     private String taskId;
     private String courseId; //课程id
     private String taskName; //作业名
@@ -29,6 +28,5 @@ public class TaskVo {
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date updateTime;
 
-    private String situation;  //作业批改情况
-    private String grade;  //作业分数
+    private String path;  //附件路径
 }

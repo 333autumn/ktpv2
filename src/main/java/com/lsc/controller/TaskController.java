@@ -1,7 +1,8 @@
 package com.lsc.controller;
 
 import com.lsc.eneity.Task;
-import com.lsc.eneity.TaskVo;
+import com.lsc.eneity.TaskDetailsVo;
+import com.lsc.eneity.TaskListVo;
 import com.lsc.service.impl.AnnexServiceImpl;
 import com.lsc.service.impl.TaskServiceImpl;
 import com.lsc.service.impl.UserServiceImpl;
@@ -31,8 +32,11 @@ public class TaskController {
 
     private final AnnexServiceImpl annexService;
 
+    /**
+     * 教师发布作业
+     */
     @PostMapping("/createTask")
-    public ResponseResult createTask(@RequestHeader String token, @RequestBody Task task) {
+    public ResponseResult createTask(@RequestHeader String token, @RequestPart Task task,@RequestPart MultipartFile file) {
         if (token.length() == 0) {
             log.error("token请求头为空,发布作业失败");
             return ResponseResult.error("未携带token");
@@ -41,7 +45,9 @@ public class TaskController {
         if (!userService.getStatus(token).equals("1")) {
             return ResponseResult.error("只有教师可以发布作业");
         }
-        if (taskService.createTask(task)) {
+        //获取教师id
+        String userId=TokenUtils.getUserId(token);
+        if (taskService.createTask(task,file,userId)) {
             return ResponseResult.ok("发布作业成功");
         }
         return ResponseResult.error("发布作业失败");
@@ -54,7 +60,7 @@ public class TaskController {
         }
         String userId= TokenUtils.getUserId(token);
         log.info("获取所有作业,courseId==>{},userId==>{}", courseId,userId);
-        List<TaskVo> tasks = taskService.selectAll(courseId,userId);
+        List<TaskListVo> tasks = taskService.selectAll(courseId,userId);
         return ResponseResult.ok("获取所有作业成功", tasks);
     }
 
@@ -76,8 +82,12 @@ public class TaskController {
      */
     @GetMapping("/selectById")
     public ResponseResult selectById(String taskId){
-        Task task=taskService.getById(taskId);
+        TaskDetailsVo task=taskService.getDetailsVoById(taskId);
         return ResponseResult.ok("作业查询成功",task);
     }
+
+    /**
+     * 获取作业下的所有成绩
+     */
 
 }
