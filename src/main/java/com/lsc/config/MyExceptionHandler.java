@@ -26,6 +26,7 @@ public class MyExceptionHandler {
      */
     @ExceptionHandler(RuntimeException.class)
     public ResponseResult exceptionHandler(RuntimeException e) {
+        e.printStackTrace();
         log.error("全局异常处理捕获到RuntimeException异常,异常信息==>{}", e.getMessage());
         return ResponseResult.error(e.getMessage());
     }
