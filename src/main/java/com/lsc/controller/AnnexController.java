@@ -38,7 +38,6 @@ public class AnnexController {
      * 用户下载附件
      * 返回一个下载连接
      */
-    //TODO
     @GetMapping("/download")
     public ResponseResult download(){
         return null;

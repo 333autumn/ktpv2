@@ -130,6 +130,14 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
      */
     @Override
     public Course createCourse(Course course) {
+        //根据课程名查找课程,保证课程名的唯一性
+        String courseName=course.getCourseName();
+        LambdaQueryWrapper<Course> courseQW=new LambdaQueryWrapper<>();
+        courseQW.eq(Course::getCourseName,courseName);
+        Course one = getOne(courseQW);
+        if (Objects.nonNull(one)){
+            throw new RuntimeException("课程名不能重复,课程创建失败");
+        }
         //设置课程状态
         course.setCourseStatus(Constant.CourseStatus.NORMAL);
         //设置学生数量
