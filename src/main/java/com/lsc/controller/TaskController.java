@@ -1,5 +1,6 @@
 package com.lsc.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.lsc.eneity.Task;
 import com.lsc.eneity.TaskDetailsVo;
 import com.lsc.eneity.TaskListVo;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author lsc
@@ -36,7 +38,7 @@ public class TaskController {
      * 教师发布作业
      */
     @PostMapping("/createTask")
-    public ResponseResult createTask(@RequestHeader String token, @RequestPart Task task,@RequestPart MultipartFile file) {
+    public ResponseResult createTask(@RequestHeader String token,@RequestPart Task task,@RequestPart MultipartFile file) {
         if (token.length() == 0) {
             log.error("token请求头为空,发布作业失败");
             return ResponseResult.error("未携带token");
@@ -47,6 +49,11 @@ public class TaskController {
         }
         //获取教师id
         String userId=TokenUtils.getUserId(token);
+
+        log.info("发布作业,用户id==>{}",userId);
+        log.info("发布作业,作业信息==>{}", JSON.toJSONString(task));
+        log.info("发布作业,上传的原始文件名==>{}",file.getOriginalFilename());
+
         if (taskService.createTask(task,file,userId)) {
             return ResponseResult.ok("发布作业成功");
         }
@@ -87,7 +94,18 @@ public class TaskController {
     }
 
     /**
-     * 获取作业下的所有成绩
+     * 获取指定作业下的所有成绩
      */
+    @GetMapping("/getAllGrades")
+    public ResponseResult getAllGrades(String taskId){
+        if (Objects.isNull(taskId)){
+            return ResponseResult.error("传入参数为空");
+        }
+        //根据作业id找到教师id
+        String userId=taskService.getUserIdByTaskId(taskId);
+
+        log.info("获取指定作业下的所有成绩,courseId==>{},userId==>{}",taskId,userId);
+        return taskService.getAllGrades(taskId,userId);
+    }
 
 }

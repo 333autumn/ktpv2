@@ -5,6 +5,7 @@ import com.lsc.eneity.Grade;
 import com.lsc.eneity.Task;
 import com.lsc.eneity.TaskDetailsVo;
 import com.lsc.eneity.TaskListVo;
+import com.lsc.utils.ResponseResult;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -24,4 +25,8 @@ public interface TaskService extends IService<Task> {
     void addSubmitNum(String taskId);
 
     TaskDetailsVo getDetailsVoById(String taskId);
+
+    ResponseResult getAllGrades(String taskId,String userId);
+
+    String getUserIdByTaskId(String taskId);
 }
