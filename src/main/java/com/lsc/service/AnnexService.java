@@ -15,5 +15,5 @@ public interface AnnexService extends IService<Annex> {
 
     ResponseResult uploadAnnex(MultipartFile file, String taskId, String userId);
 
-    void submit(MultipartFile file, String taskId, String userId, String remarks);
+    boolean submit(MultipartFile file, String taskId, String userId, String remarks);
 }

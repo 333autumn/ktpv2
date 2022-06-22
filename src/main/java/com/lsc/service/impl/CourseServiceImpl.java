@@ -166,8 +166,11 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
             courseMembers.setUpdateTime(DateUtils.now());
             //用户状态为教师
             courseMembers.setUserStatus(Constant.UserStatus.TEACHER);
-            courseMembersService.updateById(courseMembers);
-            log.info("教师自动加入课程成功");
+            if (courseMembersService.save(courseMembers)){
+                log.info("教师自动加入课程成功");
+            }else {
+                log.error("教师自动加入课程失败,请手动加入课程");
+            }
             return course1;
         }
         return null;

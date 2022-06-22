@@ -14,6 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Objects;
 
@@ -38,7 +40,9 @@ public class TaskController {
      * 教师发布作业
      */
     @PostMapping("/createTask")
-    public ResponseResult createTask(@RequestHeader String token,@RequestPart Task task,@RequestPart MultipartFile file) {
+    public ResponseResult createTask(@RequestHeader String token,@RequestPart MultipartFile file,@RequestParam String courseId,
+                                     @RequestParam String taskName,@RequestParam String releaseTime,@RequestParam String cutOffTime,
+                                     @RequestParam String remarks) {
         if (token.length() == 0) {
             log.error("token请求头为空,发布作业失败");
             return ResponseResult.error("未携带token");
@@ -47,8 +51,21 @@ public class TaskController {
         if (!userService.getStatus(token).equals("1")) {
             return ResponseResult.error("只有教师可以发布作业");
         }
+
         //获取教师id
         String userId=TokenUtils.getUserId(token);
+        //封装task对象
+        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yy-MM-dd");
+        Task task=new Task();
+        task.setCourseId(courseId);
+        task.setTaskName(taskName);
+        try {
+            task.setReleaseTime(simpleDateFormat.parse(releaseTime));
+            task.setCutOffTime(simpleDateFormat.parse(cutOffTime));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        task.setRemarks(remarks);
 
         log.info("发布作业,用户id==>{}",userId);
         log.info("发布作业,作业信息==>{}", JSON.toJSONString(task));
@@ -78,9 +95,11 @@ public class TaskController {
     @PostMapping("/submit")
     public ResponseResult submit(MultipartFile file,@RequestParam String taskId,@RequestParam String userId,
                                  @RequestParam String remarks){
-        annexService.submit(file,taskId,userId,remarks);
-        //提交作业成功后,当前作业的提交数量+1
-        taskService.addSubmitNum(taskId);
+        if (annexService.submit(file,taskId,userId,remarks)){
+            //返回结果为false说明作业是更新不是新增,提交数量不用+1
+            //提交作业成功后,当前作业的提交数量+1
+            taskService.addSubmitNum(taskId);
+        }
         return ResponseResult.ok("提交作业成功");
     }
 

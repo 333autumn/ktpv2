@@ -1,6 +1,8 @@
 package com.lsc.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
 import com.lsc.eneity.Annex;
@@ -21,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Objects;
 
 /**
  * @author lsc
@@ -90,9 +93,10 @@ public class AnnexServiceImpl extends ServiceImpl<AnnexMapper, Annex>  implement
      * @param taskId 作业id
      * @param userId 用户id
      * @param remarks 提交详情(除了附件之外的文字内容)
+     * @return
      */
     @Override
-    public void submit(MultipartFile file, String taskId, String userId, String remarks) {
+    public boolean submit(MultipartFile file, String taskId, String userId, String remarks) {
         //获取原始文件名
         String originalFilename = file.getOriginalFilename();
         //使用文件名生成工具类生成不重复的文件名
@@ -113,8 +117,28 @@ public class AnnexServiceImpl extends ServiceImpl<AnnexMapper, Annex>  implement
         annex.setRemarks(remarks);
         annex.setCreateTime(DateUtils.now());
         annex.setUpdateTime(DateUtils.now());
-        if (!save(annex)) {
-            throw new RuntimeException("数据库保存附件失败");
+        //判断是否已经提交过作业
+        LambdaQueryWrapper<Annex> annexQW=new LambdaQueryWrapper<>();
+        annexQW.eq(Annex::getOwnerId,userId)
+                .eq(Annex::getTaskId,taskId);
+
+        Annex annex1=getOne(annexQW);
+        if (Objects.isNull(annex1)){
+            //新增作业
+            if (!save(annex)) {
+                throw new RuntimeException("数据库保存附件失败");
+            }
+            return true;
+        }else {
+            //更新作业
+            LambdaUpdateWrapper<Annex> updateWrapper=new LambdaUpdateWrapper<>();
+            updateWrapper.eq(Annex::getTaskId,taskId)
+                    .eq(Annex::getOwnerId,userId);
+
+            if (!update(annex,updateWrapper)){
+                throw new RuntimeException("数据库更新附件失败");
+            }
+            return false;
         }
     }
 
