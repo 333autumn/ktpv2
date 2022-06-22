@@ -6,6 +6,7 @@ import com.lsc.eneity.*;
 import com.lsc.mapper.TaskMapper;
 import com.lsc.service.TaskService;
 import com.lsc.utils.BeanCopyUtils;
+import com.lsc.utils.Constant;
 import com.lsc.utils.DateUtils;
 import com.lsc.utils.ResponseResult;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author lsc
@@ -37,6 +39,8 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
     private final TaskMapper taskMapper;
 
     private final UserServiceImpl userService;
+
+    private final CourseMembersServiceImpl courseMembersService;
     /**
      * 发布作业
      */
@@ -183,56 +187,117 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
 
     /**
      * 获取指定作业下提交的全部作业
+     * 未提交作业的学生信息也要返回
      * @param taskId 作业id
      * @param userId 教师id
      */
     @Override
     public ResponseResult getAllGrades(String taskId,String userId) {
-        //根据作业id查询所有提交的作业
-        LambdaQueryWrapper<Annex> annexQW=new LambdaQueryWrapper<>();
-        annexQW.eq(Annex::getTaskId,taskId)
-                .ne(Annex::getOwnerId,userId);  //去掉教师为作业添加的附件
 
-        List<Annex> list=annexService.list(annexQW);
+        //根据作业id查询课程id
+        Task task=getById(taskId);
 
-        List<SubmitStatusVo> data=new ArrayList<>();
-        for (Annex annex : list) {
-            SubmitStatusVo temp=new SubmitStatusVo();
+        if (Objects.isNull(task)){
+            return ResponseResult.error("作业不存在");
+        }
+
+        String courseId=task.getCourseId();
+
+        //根据课程id获取对应课程下的所有学生id
+        LambdaQueryWrapper<CourseMembers> courseMembersQW=new LambdaQueryWrapper<>();
+        courseMembersQW.eq(CourseMembers::getCourseId,courseId)
+                .eq(CourseMembers::getUserStatus, Constant.UserStatus.STUDENT);
+
+        List<CourseMembers> courseMembers = courseMembersService.list(courseMembersQW);
+
+        List<String> studentIds=courseMembers.stream()
+                .map(CourseMembers::getUserId)
+                .collect(Collectors.toList());
+
+        List<SubmitStatusVo> data = new ArrayList<>();
+
+        for (String id : studentIds) {
+            User user=userService.getById(id);
+            SubmitStatusVo temp = new SubmitStatusVo();
             //设置学生id
-            temp.setStudentId(annex.getOwnerId());
-            //设置学号和姓名
-            User user=userService.getById(annex.getOwnerId());
-            if (Objects.nonNull(user)){
-                if (Objects.nonNull(user.getStno())){
-                    temp.setStno(user.getStno());
-                }
-                if (Objects.nonNull(user.getName())){
-                    temp.setName(user.getName());
-                }
-            }
-            //根据作业id和学生id找到对应的学生分数
+            temp.setStudentId(id);
+            //设置学号
+            temp.setStno(user.getStno());
+            //设置学生姓名
+            temp.setStno(user.getUsername());
+            //根据学生id和作业id查询分数
             LambdaQueryWrapper<Grade> gradeQW=new LambdaQueryWrapper<>();
-            gradeQW.eq(Grade::getTaskId,taskId)
-                    .eq(Grade::getStudentId,annex.getOwnerId());
+            gradeQW.eq(Grade::getStudentId,id)
+                    .eq(Grade::getTaskId,taskId);
 
-            Grade grade=gradeService.getOne(gradeQW);
-
-            //设置分数
-            if (Objects.nonNull(grade)){
-                  temp.setScore(grade.getScore());
-            }else {
+            Grade grade = gradeService.getOne(gradeQW);
+            if (Objects.isNull(grade)){//教师未批改
                 temp.setScore("0");
+            }else {
+                temp.setScore(grade.getScore());
             }
+            //设置附件(学生提交的作业)路径
+            //设置附件提交时间
+            //根据作业id和学生id查询附件
+            LambdaQueryWrapper<Annex> annexQW=new LambdaQueryWrapper<>();
+            annexQW.eq(Annex::getTaskId,taskId)
+                    .eq(Annex::getOwnerId,id);
 
-            //设置提交时间
-            temp.setSummitTime(annex.getCreateTime());
-
-            //设置附件路径
-            temp.setPath(annex.getPath());
+            Annex annex=annexService.getOne(annexQW);
+            if (Objects.isNull(annex)){//未提交作业
+                temp.setPath("");
+            }else {
+                temp.setPath(annex.getPath());
+                temp.setSummitTime(annex.getCreateTime());
+            }
 
             data.add(temp);
         }
 
+//        //根据作业id查询所有提交的作业
+//        LambdaQueryWrapper<Annex> annexQW = new LambdaQueryWrapper<>();
+//        annexQW.eq(Annex::getTaskId, taskId)
+//                .ne(Annex::getOwnerId, userId);  //去掉教师为作业添加的附件
+//
+//        List<Annex> list = annexService.list(annexQW);
+//
+//        List<SubmitStatusVo> data = new ArrayList<>();
+//        for (Annex annex : list) {
+//            SubmitStatusVo temp = new SubmitStatusVo();
+//            //设置学生id
+//            temp.setStudentId(annex.getOwnerId());
+//            //设置学号和姓名
+//            User user = userService.getById(annex.getOwnerId());
+//            if (Objects.nonNull(user)) {
+//                if (Objects.nonNull(user.getStno())) {
+//                    temp.setStno(user.getStno());
+//                }
+//                if (Objects.nonNull(user.getName())) {
+//                    temp.setName(user.getName());
+//                }
+//            }
+//            //根据作业id和学生id找到对应的学生分数
+//            LambdaQueryWrapper<Grade> gradeQW = new LambdaQueryWrapper<>();
+//            gradeQW.eq(Grade::getTaskId, taskId)
+//                    .eq(Grade::getStudentId, annex.getOwnerId());
+//
+//            Grade grade = gradeService.getOne(gradeQW);
+//
+//            //设置分数
+//            if (Objects.nonNull(grade)) {
+//                temp.setScore(grade.getScore());
+//            } else {
+//                temp.setScore("0");
+//            }
+//
+//            //设置提交时间
+//            temp.setSummitTime(annex.getCreateTime());
+//
+//            //设置附件路径
+//            temp.setPath(annex.getPath());
+//
+//            data.add(temp);
+//        }
         return ResponseResult.ok(data);
     }
 
@@ -243,15 +308,12 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
      */
     @Override
     public String getUserIdByTaskId(String taskId) {
-
         //根据作业id获取课程id
         String courseId=getById(taskId).getCourseId();
         if (Objects.isNull(courseId)){
             throw new RuntimeException("作业所属的课程不存在");
         }
-
         //根据课程id获取教师id
-
         return courseService.getById(courseId).getOwnerId();
     }
 
