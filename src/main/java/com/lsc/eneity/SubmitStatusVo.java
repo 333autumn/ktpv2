@@ -31,6 +31,7 @@ public class SubmitStatusVo {
 
     private String path; //附件路径
 
+
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date summitTime;  //提交时间(附件创建时间)
 

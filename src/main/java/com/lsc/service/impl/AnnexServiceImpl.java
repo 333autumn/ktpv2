@@ -125,12 +125,14 @@ public class AnnexServiceImpl extends ServiceImpl<AnnexMapper, Annex>  implement
         Annex annex1=getOne(annexQW);
         if (Objects.isNull(annex1)){
             //新增作业
+            log.info("新增作业");
             if (!save(annex)) {
                 throw new RuntimeException("数据库保存附件失败");
             }
             return true;
         }else {
             //更新作业
+            log.info("更新作业");
             LambdaUpdateWrapper<Annex> updateWrapper=new LambdaUpdateWrapper<>();
             updateWrapper.eq(Annex::getTaskId,taskId)
                     .eq(Annex::getOwnerId,userId);

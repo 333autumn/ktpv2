@@ -223,7 +223,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
             //设置学号
             temp.setStno(user.getStno());
             //设置学生姓名
-            temp.setStno(user.getUsername());
+            temp.setName(user.getUsername());
             //根据学生id和作业id查询分数
             LambdaQueryWrapper<Grade> gradeQW=new LambdaQueryWrapper<>();
             gradeQW.eq(Grade::getStudentId,id)
@@ -337,9 +337,11 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
             data.put("isSubmit", false);
             data.put("score", 0);
             data.put("path", "");
+            data.put("remarks","");
         } else {
             data.put("isSubmit", true);
             data.put("path", annex.getPath());
+            data.put("remarks",annex.getRemarks());
             //根据作业id和学生id查找成绩
             LambdaQueryWrapper<Grade> gradeQW = new LambdaQueryWrapper<>();
             gradeQW.eq(Grade::getTaskId, taskId)
