@@ -164,6 +164,8 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
             courseMembers.setUserId(course.getOwnerId());
             courseMembers.setCreateTime(DateUtils.now());
             courseMembers.setUpdateTime(DateUtils.now());
+            //状态改为正常
+            courseMembers.setCourseStatus(Constant.CourseStatus.NORMAL);
             //用户状态为教师
             courseMembers.setUserStatus(Constant.UserStatus.TEACHER);
             if (courseMembersService.save(courseMembers)){
