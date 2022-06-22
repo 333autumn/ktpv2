@@ -40,7 +40,7 @@ public class TaskController {
      * 教师发布作业
      */
     @PostMapping("/createTask")
-    public ResponseResult createTask(@RequestHeader String token,@RequestPart MultipartFile file,@RequestParam String courseId,
+    public ResponseResult createTask(@RequestHeader String token,@RequestBody MultipartFile file,@RequestParam String courseId,
                                      @RequestParam String taskName,@RequestParam String releaseTime,@RequestParam String cutOffTime,
                                      @RequestParam String remarks) {
         if (token.length() == 0) {
