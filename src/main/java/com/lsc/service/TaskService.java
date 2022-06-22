@@ -29,4 +29,6 @@ public interface TaskService extends IService<Task> {
     ResponseResult getAllGrades(String taskId,String userId);
 
     String getUserIdByTaskId(String taskId);
+
+    ResponseResult getSubmitStatus(String taskId, String studentId);
 }

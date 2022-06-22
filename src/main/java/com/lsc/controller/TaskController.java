@@ -51,11 +51,10 @@ public class TaskController {
         if (!userService.getStatus(token).equals("1")) {
             return ResponseResult.error("只有教师可以发布作业");
         }
-
         //获取教师id
         String userId=TokenUtils.getUserId(token);
         //封装task对象
-        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yy-MM-dd");
+        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yy-MM-dd  HH:mm:ss");
         Task task=new Task();
         task.setCourseId(courseId);
         task.setTaskName(taskName);
@@ -125,6 +124,15 @@ public class TaskController {
 
         log.info("获取指定作业下的所有成绩,courseId==>{},userId==>{}",taskId,userId);
         return taskService.getAllGrades(taskId,userId);
+    }
+
+    /**
+     * 获取某一作业的指定学生的提交情况
+     */
+    @GetMapping("/getSubmitStatus")
+    public ResponseResult getSubmitStatus(@RequestParam String taskId,@RequestParam String studentId){
+        log.info("获取某一作业的指定学生的提交情况,taskId==>{},studentId==>{}",taskId,studentId);
+        return taskService.getSubmitStatus(taskId,studentId);
     }
 
 }

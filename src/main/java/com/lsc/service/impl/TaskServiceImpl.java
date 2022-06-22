@@ -15,9 +15,7 @@ import org.apache.ibatis.jdbc.SQL;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -78,7 +76,8 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
     @Override
     public List<TaskListVo> selectAll(String courseId, String userId) {
         LambdaQueryWrapper<Task> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Task::getCourseId, courseId);
+        queryWrapper.eq(Task::getCourseId, courseId)
+                .orderByAsc(Task::getCreateTime);
         List<Task> tasks=list(queryWrapper);
         List<TaskListVo> taskVos = BeanCopyUtils.copyBeanList(tasks, TaskListVo.class);
         for (TaskListVo taskVo : taskVos) {
@@ -315,6 +314,47 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
         }
         //根据课程id获取教师id
         return courseService.getById(courseId).getOwnerId();
+    }
+
+
+    /**
+     * 获取某一作业的指定学生的提交情况
+     * @param taskId 作业id
+     * @param studentId 学生id
+     */
+    @Override
+    public ResponseResult getSubmitStatus(String taskId, String studentId) {
+        //根据作业id和学生id查找对应的作业
+        LambdaQueryWrapper<Annex> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Annex::getTaskId, taskId)
+                .eq(Annex::getOwnerId, studentId);
+
+        Annex annex = annexService.getOne(queryWrapper);
+
+        Map<String, Object> data = new HashMap<>();
+
+        if (Objects.isNull(annex)) {//找不到对应的附件,说明未提交作业
+            data.put("isSubmit", false);
+            data.put("score", 0);
+            data.put("path", "");
+        } else {
+            data.put("isSubmit", true);
+            data.put("path", annex.getPath());
+            //根据作业id和学生id查找成绩
+            LambdaQueryWrapper<Grade> gradeQW = new LambdaQueryWrapper<>();
+            gradeQW.eq(Grade::getTaskId, taskId)
+                    .eq(Grade::getStudentId, studentId);
+
+            Grade grade = gradeService.getOne(gradeQW);
+
+            if (Objects.isNull(grade)) {//说明作业还未批改
+                data.put("score", 0);
+            } else {
+                data.put("score", grade.getScore());
+            }
+
+        }
+        return ResponseResult.ok(data);
     }
 
 }
