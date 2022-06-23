@@ -49,6 +49,7 @@ public class AnnexServiceImpl extends ServiceImpl<AnnexMapper, Annex>  implement
         //获取原始文件名
         String originalFilename = file.getOriginalFilename();
         //如果判断通过上传文件到OSS
+        assert originalFilename != null;
         String fileName = PathUtils.generateFilePath(originalFilename);
         log.info("文件保存路径为==>{}", fileName);
         return uploadOss(file, fileName);
@@ -65,6 +66,7 @@ public class AnnexServiceImpl extends ServiceImpl<AnnexMapper, Annex>  implement
         //获取原始文件名
         String originalFilename=file.getOriginalFilename();
         //使用文件名生成工具类生成不重复的文件名
+        assert originalFilename != null;
         String fileName = PathUtils.generateFilePath(originalFilename);
         //文件上传到七牛云进行保存
         ResponseResult responseResult=uploadOss(file,taskId+"/"+fileName);
@@ -93,13 +95,13 @@ public class AnnexServiceImpl extends ServiceImpl<AnnexMapper, Annex>  implement
      * @param taskId 作业id
      * @param userId 用户id
      * @param remarks 提交详情(除了附件之外的文字内容)
-     * @return
      */
     @Override
     public boolean submit(MultipartFile file, String taskId, String userId, String remarks) {
         //获取原始文件名
         String originalFilename = file.getOriginalFilename();
         //使用文件名生成工具类生成不重复的文件名
+        assert originalFilename != null;
         String fileName = PathUtils.generateFilePath(originalFilename);
         //文件上传到七牛云进行保存
         ResponseResult responseResult = uploadOss(file, taskId + "/" + fileName);

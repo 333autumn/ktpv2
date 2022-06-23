@@ -54,7 +54,7 @@ public class TaskController {
         //获取教师id
         String userId=TokenUtils.getUserId(token);
         //封装task对象
-        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yy-MM-dd  HH:mm:ss");
+        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yy-MM-dd HH:mm:ss");
         Task task=new Task();
         task.setCourseId(courseId);
         task.setTaskName(taskName);
@@ -95,10 +95,12 @@ public class TaskController {
     public ResponseResult submit(MultipartFile file,@RequestParam String taskId,@RequestParam String userId,
                                  @RequestParam String remarks){
         if (annexService.submit(file,taskId,userId,remarks)){
+            log.info("本次提交是新增作业");
             //返回结果为false说明作业是更新不是新增,提交数量不用+1
             //提交作业成功后,当前作业的提交数量+1
             taskService.addSubmitNum(taskId);
         }
+        log.info("本次提交是更新作业");
         return ResponseResult.ok("提交作业成功");
     }
 

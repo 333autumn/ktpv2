@@ -11,7 +11,6 @@ import com.lsc.utils.DateUtils;
 import com.lsc.utils.ResponseResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.jdbc.SQL;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -77,7 +76,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
     public List<TaskListVo> selectAll(String courseId, String userId) {
         LambdaQueryWrapper<Task> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Task::getCourseId, courseId)
-                .orderByAsc(Task::getCreateTime);
+                .orderByDesc(Task::getCreateTime);
         List<Task> tasks=list(queryWrapper);
         List<TaskListVo> taskVos = BeanCopyUtils.copyBeanList(tasks, TaskListVo.class);
         for (TaskListVo taskVo : taskVos) {
@@ -104,6 +103,21 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
      */
     @Override
     public boolean correct(Grade grade) {
+        //判断是否是第一次批改
+        //根据作业id和学生id查询对应的成绩
+        LambdaQueryWrapper<Grade> gradeQW=new LambdaQueryWrapper<>();
+        gradeQW.eq(Grade::getStudentId,grade.getStudentId())
+                        .eq(Grade::getTaskId,grade.getTaskId());
+
+        Grade selectGrade=gradeService.getOne(gradeQW);
+        if (Objects.nonNull(selectGrade)){//说明该作业不是第一次批改
+            //覆盖之前的作业批改信息
+            log.info("教师批改作业,不是第一次批改");
+            selectGrade.setUpdateTime(DateUtils.now());
+            selectGrade.setScore(grade.getScore());
+            return  gradeService.updateById(selectGrade);
+        }
+        log.info("教师批改作业,首次批改");
         grade.setCreateTime(DateUtils.now());
         grade.setUpdateTime(DateUtils.now());
         if (gradeService.save(grade)) {

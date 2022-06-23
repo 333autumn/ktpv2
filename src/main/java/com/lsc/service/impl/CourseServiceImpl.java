@@ -17,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import javax.websocket.OnError;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -326,7 +325,6 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
         if (!courseMembersService.updateById(courseMembers)){
             throw new RuntimeException("数据库发生错误,恢复归档课程失败");
         }
-
     }
 
     /**
