@@ -223,7 +223,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
             //设置学号
             temp.setStno(user.getStno());
             //设置学生姓名
-            temp.setName(user.getUsername());
+            temp.setName(user.getName());
             //根据学生id和作业id查询分数
             LambdaQueryWrapper<Grade> gradeQW=new LambdaQueryWrapper<>();
             gradeQW.eq(Grade::getStudentId,id)
